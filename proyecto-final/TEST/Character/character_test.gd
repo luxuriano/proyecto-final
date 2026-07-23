@@ -25,7 +25,7 @@ func _physics_process(delta):
 	if is_on_floor() and Input.is_action_just_pressed("salto"):
 		velocity.y -= jump
 		DUBLE_JUMP=true
-	elif !is_on_floor() and Input.is_action_just_pressed("salto"):
+	elif !is_on_floor() and Input.is_action_just_pressed("salto") and DUBLE_JUMP== true:
 		velocity.y -= jump
 		DUBLE_JUMP=false
 	else:

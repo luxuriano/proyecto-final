@@ -271,7 +271,7 @@ frame_progress = 0.417888
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(0, -21)
-zoom = Vector2(7, 7)
+zoom = Vector2(6, 6)
 script = ExtResource("3_yhsqg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
