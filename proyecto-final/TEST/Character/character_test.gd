@@ -5,6 +5,7 @@ var direccion := 0.0
 var jump = 150
 const gravity := 9
 var DUBLE_JUMP = true
+var H_DJ = false
 @onready var anim := $AnimatedSprite2D
 
 func _ready() -> void:
@@ -25,6 +26,7 @@ func _physics_process(delta):
 	if is_on_floor() and Input.is_action_just_pressed("salto"):
 		velocity.y -= jump
 		DUBLE_JUMP=true
+	
 	elif !is_on_floor() and Input.is_action_just_pressed("salto") and DUBLE_JUMP== true:
 		velocity.y -= jump
 		DUBLE_JUMP=false
