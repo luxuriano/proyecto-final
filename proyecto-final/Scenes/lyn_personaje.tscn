@@ -1,0 +1,245 @@
+[gd_scene format=3 uid="uid://dpj8mfr0jpes5"]
+
+[ext_resource type="Texture2D" uid="uid://boivo0136kogs" path="res://Lyn Assets/Lyn moviéndose/Caida.png" id="1_8pjkx"]
+[ext_resource type="Texture2D" uid="uid://drhis04ywvy00" path="res://Lyn Assets/Lyn moviéndose/Dash (1).png" id="2_bmgmp"]
+[ext_resource type="Texture2D" uid="uid://cg13dt005hwvg" path="res://Lyn Assets/Lyn daño y derrota/Daño.png" id="2_pqqo6"]
+[ext_resource type="Texture2D" uid="uid://dptpfjpldxnws" path="res://Lyn Assets/Lyn quieta/380 sin título_20260904200512.png" id="2_vc5cj"]
+[ext_resource type="Texture2D" uid="uid://ff1skhrncivf" path="res://Lyn Assets/Lyn moviéndose/Moverse 1.png" id="2_vi5tb"]
+[ext_resource type="Texture2D" uid="uid://b6mi8ndfdvd4v" path="res://Lyn Assets/Lyn moviéndose/Moverse 2.png" id="3_0v545"]
+[ext_resource type="Texture2D" uid="uid://ddw76l51x2j34" path="res://Lyn Assets/Lyn daño y derrota/Derrota.png" id="3_bwum6"]
+[ext_resource type="Texture2D" uid="uid://r2fwaxa7sjhe" path="res://Lyn Assets/Lyn quieta/380 sin título_20260904200518.png" id="3_rx32b"]
+[ext_resource type="Texture2D" uid="uid://b8du1sgy5f6bk" path="res://Lyn Assets/Lyn quieta/380 sin título_20260904200526.png" id="4_a78te"]
+[ext_resource type="Texture2D" uid="uid://cs4d6oc6o0whx" path="res://Lyn Assets/Lyn moviéndose/Moverse 3.png" id="4_ycuv8"]
+[ext_resource type="Texture2D" uid="uid://b1af3rwf71rat" path="res://Lyn Assets/Lyn moviéndose/Moverse 4.png" id="5_pqqo6"]
+[ext_resource type="Texture2D" uid="uid://b2yjtu17omq2c" path="res://Lyn Assets/Lyn moviéndose/Moverse 5.png" id="6_bwum6"]
+[ext_resource type="Texture2D" uid="uid://dcfb3cql1fta3" path="res://Lyn Assets/Lyn moviéndose/Moverse 6.png" id="7_p0go5"]
+[ext_resource type="Texture2D" uid="uid://dty7ofl3hs312" path="res://Lyn Assets/Lyn pegando/Pegando 1.png" id="9_bwum6"]
+[ext_resource type="Texture2D" uid="uid://d1kxh83yrui2h" path="res://Lyn Assets/Lyn pegando/Pegando 2.png" id="10_p0go5"]
+[ext_resource type="Texture2D" uid="uid://l8soaxdkd27w" path="res://Lyn Assets/Lyn moviéndose/Saltando (1).png" id="16_udx3f"]
+
+[sub_resource type="GDScript" id="GDScript_mdx60"]
+script/source = "extends CharacterBody2D
+
+
+const SPEED = 150.0
+const JUMP_VELOCITY = -300.0
+
+const DASH_SPEED = 300.0
+const DASH_DURATION = 0.15
+const DASH_COOLDOWN = 1.0
+
+var is_dashing = false
+var dash_timer = 0.0
+var dash_cooldown_timer = 0.0
+
+var facing_direction = 1
+
+var vida = 4
+const VIDA_MAXIMA = 5
+
+
+func _physics_process(delta: float) -> void:
+
+	if dash_cooldown_timer > 0:
+		dash_cooldown_timer -= delta
+
+	if Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
+		is_dashing = true
+		dash_timer = DASH_DURATION
+		dash_cooldown_timer = DASH_COOLDOWN
+
+	if is_dashing:
+		velocity.x = facing_direction * DASH_SPEED
+		velocity.y = 0
+
+		$AnimatedSprite2D.play(\"Dash\")
+
+		if facing_direction == 1:
+			$AnimatedSprite2D.flip_h = false
+		else:
+			$AnimatedSprite2D.flip_h = true
+
+		dash_timer -= delta
+
+		if dash_timer <= 0:
+			is_dashing = false
+
+		move_and_slide()
+		return
+
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
+	var direction := Input.get_axis(\"ui_left\", \"ui_right\")
+
+	if direction:
+		velocity.x = direction * SPEED
+
+		if direction > 0:
+			facing_direction = 1
+		elif direction < 0:
+			facing_direction = -1
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+
+	if facing_direction == 1:
+		$AnimatedSprite2D.flip_h = false
+	else:
+		$AnimatedSprite2D.flip_h = true
+
+	if not is_on_floor():
+
+		if velocity.y < 0:
+			$AnimatedSprite2D.play(\"Salto\")
+		else:
+			$AnimatedSprite2D.play(\"Caida\")
+
+	else:
+
+		if direction != 0:
+			$AnimatedSprite2D.play(\"Moverse\")
+		else:
+			$AnimatedSprite2D.play(\"Quieta\")
+
+	move_and_slide()
+
+
+func curar(cantidad: int) -> void:
+	if vida < VIDA_MAXIMA:
+		vida += cantidad
+		vida = min(vida, VIDA_MAXIMA)
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kqg6p"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_8pjkx")
+}],
+"loop": false,
+"name": &"Caida",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_bmgmp")
+}],
+"loop": true,
+"name": &"Dash",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_pqqo6")
+}],
+"loop": true,
+"name": &"Daño",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_bwum6")
+}],
+"loop": true,
+"name": &"Derrota",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 0.5,
+"texture": ExtResource("2_vi5tb")
+}, {
+"duration": 0.5,
+"texture": ExtResource("3_0v545")
+}, {
+"duration": 0.5,
+"texture": ExtResource("4_ycuv8")
+}, {
+"duration": 0.5,
+"texture": ExtResource("5_pqqo6")
+}, {
+"duration": 0.5,
+"texture": ExtResource("6_bwum6")
+}, {
+"duration": 0.5,
+"texture": ExtResource("7_p0go5")
+}, {
+"duration": 0.5,
+"texture": ExtResource("5_pqqo6")
+}],
+"loop": true,
+"name": &"Moverse",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 2.0,
+"texture": ExtResource("9_bwum6")
+}, {
+"duration": 1.5,
+"texture": ExtResource("10_p0go5")
+}],
+"loop": false,
+"name": &"Pegar",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_vc5cj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rx32b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_a78te")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rx32b")
+}],
+"loop": true,
+"name": &"Quieta",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_udx3f")
+}],
+"loop": false,
+"name": &"Salto",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_olyy6"]
+size = Vector2(12, 25)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8pjkx"]
+size = Vector2(12, 25)
+
+[node name="Lyn Personaje" type="CharacterBody2D" unique_id=888920584]
+collision_layer = 2
+script = SubResource("GDScript_mdx60")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=343663388]
+position = Vector2(-5.9604645e-08, 0)
+scale = Vector2(0.035125002, 0.032999996)
+sprite_frames = SubResource("SpriteFrames_kqg6p")
+animation = &"Derrota"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1845727729]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_olyy6")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=40730527]
+zoom = Vector2(5.5, 5.5)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=66140728]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D" unique_id=2066181335]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_8pjkx")

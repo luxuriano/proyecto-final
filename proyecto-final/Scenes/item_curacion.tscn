@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://ctx1qm0i7vg5l"]
+
+[ext_resource type="Texture2D" uid="uid://drca4eicnso76" path="res://Sprites ítems/Pera de Brian.png" id="1_rqbyb"]
+
+[sub_resource type="GDScript" id="GDScript_e156c"]
+script/source = "extends CharacterBody2D
+
+
+const GRAVEDAD = 980.0
+const CURACION = 1
+const VIDA_MAXIMA = 5
+
+
+func _physics_process(delta: float) -> void:
+	
+	if not is_on_floor():
+		velocity.y += GRAVEDAD * delta
+	else:
+		velocity.y = 0
+
+	move_and_slide()
+
+
+func _on_area_2d_body_entered(body: Node2D) -> void:
+
+	if body.name == \"Lyn Personaje\":
+
+		if body.vida < VIDA_MAXIMA:
+
+			body.curar(CURACION)
+
+			queue_free()
+"
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rqbyb"]
+radius = 2.0
+height = 6.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vh3uo"]
+radius = 3.0
+height = 8.0
+
+[node name="ItemCuracion" type="CharacterBody2D" unique_id=645194602]
+collision_layer = 4
+script = SubResource("GDScript_e156c")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1969951704]
+scale = Vector2(0.01, 0.009)
+texture = ExtResource("1_rqbyb")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=1261002742]
+shape = SubResource("CapsuleShape2D_rqbyb")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1135603155]
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1082622225]
+shape = SubResource("CapsuleShape2D_vh3uo")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

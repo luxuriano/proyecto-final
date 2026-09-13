@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://ciy0ymi2eqx3x"]
+
+[ext_resource type="Script" uid="uid://d2cp2r6nfqfgp" path="res://pera_mala.gd" id="1_yvhlv"]
+[ext_resource type="Texture2D" uid="uid://c6lohvudrxif1" path="res://Lyn Assets/images.jpg" id="2_bgqyf"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vs7n5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_bgqyf")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_73h84"]
+size = Vector2(554, 532.69226)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yvhlv"]
+size = Vector2(303, 85.25)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bgqyf"]
+
+[node name="Pera Mala" type="CharacterBody2D" unique_id=1902695209]
+script = ExtResource("1_yvhlv")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=911085683]
+position = Vector2(-8, -1)
+scale = Vector2(0.021660648, 0.04693141)
+sprite_frames = SubResource("SpriteFrames_vs7n5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888202289]
+position = Vector2(-8, -1.499999)
+scale = Vector2(0.021660646, 0.04693141)
+shape = SubResource("RectangleShape2D_73h84")
+
+[node name="RangoVision" type="Area2D" parent="." unique_id=1010466248]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=760623455]
+position = Vector2(-7, -1)
+shape = SubResource("RectangleShape2D_yvhlv")
+
+[node name="PuntoAtaque" type="Area2D" parent="." unique_id=762812244]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PuntoAtaque" unique_id=2028906593]
+position = Vector2(-27, -2)
+shape = SubResource("RectangleShape2D_bgqyf")
