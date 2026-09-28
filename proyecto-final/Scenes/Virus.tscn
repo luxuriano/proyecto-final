@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://ciy0ymi2eqx3x"]
+
+[ext_resource type="Script" uid="uid://d2cp2r6nfqfgp" path="res://pera_mala.gd" id="1_0lgdo"]
+[ext_resource type="Texture2D" uid="uid://cj8snjq224hy" path="res://Sprites Virus/Virus ataque/Virus ataque 1.png" id="2_ddven"]
+[ext_resource type="Texture2D" uid="uid://builstscpkopf" path="res://Sprites Virus/Virus ataque/Virus ataque 2.png" id="3_m63p4"]
+[ext_resource type="Texture2D" uid="uid://drc4diqncnfpo" path="res://Sprites Virus/Virus muerte/Virus daño.png" id="4_vr5u5"]
+[ext_resource type="Texture2D" uid="uid://be16y044pqqjw" path="res://Sprites Virus/Virus movimiento/Virus movimiento 1.png" id="5_2h1a3"]
+[ext_resource type="Texture2D" uid="uid://bsdb102yoygts" path="res://Sprites Virus/Virus movimiento/Virus movimiento 2.png" id="6_cjiyd"]
+[ext_resource type="Texture2D" uid="uid://lgw4gmiqj888" path="res://Sprites Virus/Virus movimiento/Virus movimiento 3.png" id="7_qnqkf"]
+[ext_resource type="Texture2D" uid="uid://b8alkdy17ova3" path="res://Sprites Virus/Virus muerte/Virus muerte 1.png" id="8_77vgb"]
+[ext_resource type="Texture2D" uid="uid://bwnv65qj1yqdk" path="res://Sprites Virus/Virus muerte/Virus muerte 2.png" id="9_s8m2q"]
+[ext_resource type="Texture2D" uid="uid://c3xn4pmkpe43f" path="res://Sprites Virus/Virus muerte/Virus muerte 3.png" id="10_f8joh"]
+[ext_resource type="Texture2D" uid="uid://e8vefm2knpan" path="res://Sprites Virus/Virus muerte/Virus muerte 4.png" id="11_721j8"]
+[ext_resource type="Texture2D" uid="uid://dhnvqab74jjwl" path="res://Sprites Virus/Virus quieto/Virus quieto 1.png" id="12_vytot"]
+[ext_resource type="Texture2D" uid="uid://nwskkja1lycc" path="res://Sprites Virus/Virus quieto/Virus quieto 2.png" id="13_up0qf"]
+[ext_resource type="Texture2D" uid="uid://blcsvjuylj534" path="res://Sprites Virus/Virus quieto/Virus quieto 3.png" id="14_274tx"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vs7n5"]
+animations = [{
+"frames": [{
+"duration": 3.0,
+"texture": ExtResource("2_ddven")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_m63p4")
+}],
+"loop": false,
+"name": &"Virusataque",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.2,
+"texture": ExtResource("4_vr5u5")
+}],
+"loop": false,
+"name": &"Virusdaño",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_2h1a3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_cjiyd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_qnqkf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_cjiyd")
+}],
+"loop": true,
+"name": &"Virusmover",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 8.0,
+"texture": ExtResource("8_77vgb")
+}, {
+"duration": 2.0,
+"texture": ExtResource("9_s8m2q")
+}, {
+"duration": 2.0,
+"texture": ExtResource("10_f8joh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_721j8")
+}],
+"loop": false,
+"name": &"Virusmuerte",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_vytot")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_up0qf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_274tx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_up0qf")
+}],
+"loop": true,
+"name": &"Virusquieto",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_73h84"]
+size = Vector2(1108.0001, 937.53845)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yvhlv"]
+size = Vector2(303, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bgqyf"]
+size = Vector2(12, 11)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0lgdo"]
+size = Vector2(24, 41)
+
+[node name="Virus" type="CharacterBody2D" unique_id=1902695209]
+collision_layer = 2
+script = ExtResource("1_0lgdo")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=911085683]
+position = Vector2(-2.3841858e-07, 0)
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_vs7n5")
+animation = &"Virusquieto"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888202289]
+position = Vector2(1.0000002, -1.9999998)
+scale = Vector2(0.021660646, 0.04693141)
+shape = SubResource("RectangleShape2D_73h84")
+
+[node name="RangoVision" type="Area2D" parent="." unique_id=1010466248]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=760623455]
+position = Vector2(0, 15)
+shape = SubResource("RectangleShape2D_yvhlv")
+
+[node name="PuntoAtaqueIzq" type="Area2D" parent="." unique_id=762812244]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PuntoAtaqueIzq" unique_id=2028906593]
+position = Vector2(-9, -3)
+shape = SubResource("RectangleShape2D_bgqyf")
+
+[node name="PuntoAtaqueDer" type="Area2D" parent="." unique_id=1784415077]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PuntoAtaqueDer" unique_id=987100181]
+position = Vector2(11, -3)
+shape = SubResource("RectangleShape2D_bgqyf")
+
+[node name="RangoPegar" type="Area2D" parent="." unique_id=2041082206]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoPegar" unique_id=1466234067]
+position = Vector2(1, -3.5)
+shape = SubResource("RectangleShape2D_0lgdo")

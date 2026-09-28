@@ -20,22 +20,51 @@
 [sub_resource type="GDScript" id="GDScript_mdx60"]
 script/source = "extends CharacterBody2D
 
+const SPEED = 300.0
+const JUMP_VELOCITY = -400.0
 
-const SPEED = 150.0
-const JUMP_VELOCITY = -300.0
-
-const DASH_SPEED = 300.0
+const DASH_SPEED = 1000.0
 const DASH_DURATION = 0.15
 const DASH_COOLDOWN = 1.0
+
+const TIEMPO_DANO = 0.5
+const TIEMPO_DERROTA = 2.0
+const TIEMPO_ATAQUE = 0.5
+const TIEMPO_COOLDOWN_ATAQUE = 0.3
 
 var is_dashing = false
 var dash_timer = 0.0
 var dash_cooldown_timer = 0.0
 
+var esta_recibiendo_dano = false
+var tiempo_dano = 0.0
+
+var esta_derrotado = false
+
+var esta_atacando = false
+var tiempo_ataque = 0.0
+var ataque_cooldown_timer = 0.0
+
 var facing_direction = 1
 
 var vida = 4
 const VIDA_MAXIMA = 5
+
+var puntos = 0
+
+var posicion_inicial: Vector2
+
+
+func _ready() -> void:
+	posicion_inicial = global_position
+
+	$AnimatedSprite2D.play(\"Quieta\")
+
+	$PegarDer.monitoring = false
+	$PegarDer.monitorable = false
+
+	$PegarIzq.monitoring = false
+	$PegarIzq.monitorable = false
 
 
 func _physics_process(delta: float) -> void:
@@ -43,10 +72,96 @@ func _physics_process(delta: float) -> void:
 	if dash_cooldown_timer > 0:
 		dash_cooldown_timer -= delta
 
+	if ataque_cooldown_timer > 0:
+		ataque_cooldown_timer -= delta
+
+
+	if esta_derrotado:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+
+
+	if esta_recibiendo_dano:
+		velocity = Vector2.ZERO
+		tiempo_dano -= delta
+
+		$AnimatedSprite2D.play(\"Daño\")
+
+		move_and_slide()
+
+		if tiempo_dano <= 0:
+			esta_recibiendo_dano = false
+			actualizar_animacion()
+
+		return
+
+
+	if esta_atacando:
+		velocity = Vector2.ZERO
+		tiempo_ataque -= delta
+
+		$AnimatedSprite2D.play(\"Pegar\")
+
+		if facing_direction == 1:
+			$AnimatedSprite2D.flip_h = false
+		else:
+			$AnimatedSprite2D.flip_h = true
+
+		if tiempo_ataque <= 0:
+			esta_atacando = false
+
+			$PegarDer.monitoring = false
+			$PegarDer.monitorable = false
+
+			$PegarIzq.monitoring = false
+			$PegarIzq.monitorable = false
+
+			ataque_cooldown_timer = TIEMPO_COOLDOWN_ATAQUE
+
+			actualizar_animacion()
+
+		move_and_slide()
+		return
+
+
+	if Input.is_action_just_pressed(\"ui_c\") and is_on_floor() and ataque_cooldown_timer <= 0:
+		esta_atacando = true
+		tiempo_ataque = TIEMPO_ATAQUE
+
+		is_dashing = false
+		dash_timer = 0
+
+		velocity = Vector2.ZERO
+
+		if facing_direction == 1:
+			$PegarDer.monitoring = true
+			$PegarDer.monitorable = true
+
+			$PegarIzq.monitoring = false
+			$PegarIzq.monitorable = false
+
+			$AnimatedSprite2D.flip_h = false
+		else:
+			$PegarIzq.monitoring = true
+			$PegarIzq.monitorable = true
+
+			$PegarDer.monitoring = false
+			$PegarDer.monitorable = false
+
+			$AnimatedSprite2D.flip_h = true
+
+		$AnimatedSprite2D.play(\"Pegar\")
+
+		move_and_slide()
+		return
+
+
 	if Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
 		is_dashing = true
 		dash_timer = DASH_DURATION
 		dash_cooldown_timer = DASH_COOLDOWN
+
 
 	if is_dashing:
 		velocity.x = facing_direction * DASH_SPEED
@@ -67,13 +182,17 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+
 
 	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
+
 	var direction := Input.get_axis(\"ui_left\", \"ui_right\")
+
 
 	if direction:
 		velocity.x = direction * SPEED
@@ -85,10 +204,19 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
+
 	if facing_direction == 1:
 		$AnimatedSprite2D.flip_h = false
 	else:
 		$AnimatedSprite2D.flip_h = true
+
+
+	actualizar_animacion()
+
+	move_and_slide()
+
+
+func actualizar_animacion() -> void:
 
 	if not is_on_floor():
 
@@ -99,18 +227,107 @@ func _physics_process(delta: float) -> void:
 
 	else:
 
+		var direction := Input.get_axis(\"ui_left\", \"ui_right\")
+
 		if direction != 0:
 			$AnimatedSprite2D.play(\"Moverse\")
 		else:
 			$AnimatedSprite2D.play(\"Quieta\")
 
-	move_and_slide()
-
 
 func curar(cantidad: int) -> void:
+
 	if vida < VIDA_MAXIMA:
 		vida += cantidad
 		vida = min(vida, VIDA_MAXIMA)
+
+
+func recibir_dano(cantidad: int, viene_de_derecha: bool = false) -> void:
+
+	if esta_recibiendo_dano or esta_derrotado:
+		return
+
+	vida -= cantidad
+	vida = max(vida, 0)
+
+	velocity = Vector2.ZERO
+
+	if vida <= 0:
+		morir()
+		return
+
+	esta_recibiendo_dano = true
+
+	is_dashing = false
+	dash_timer = 0
+
+	esta_atacando = false
+	tiempo_ataque = 0
+
+	$PegarDer.monitoring = false
+	$PegarDer.monitorable = false
+
+	$PegarIzq.monitoring = false
+	$PegarIzq.monitorable = false
+
+	tiempo_dano = TIEMPO_DANO
+
+	if viene_de_derecha:
+		$AnimatedSprite2D.flip_h = true
+	else:
+		$AnimatedSprite2D.flip_h = false
+
+	$AnimatedSprite2D.play(\"Daño\")
+
+
+func morir() -> void:
+
+	esta_derrotado = true
+
+	esta_recibiendo_dano = false
+	esta_atacando = false
+	is_dashing = false
+
+	dash_timer = 0
+	dash_cooldown_timer = 0
+	ataque_cooldown_timer = 0
+
+	velocity = Vector2.ZERO
+
+	$PegarDer.monitoring = false
+	$PegarDer.monitorable = false
+
+	$PegarIzq.monitoring = false
+	$PegarIzq.monitorable = false
+
+	$DetectorVirus.monitoring = false
+	$DetectorVirus.monitorable = false
+
+	if facing_direction == 1:
+		$AnimatedSprite2D.flip_h = false
+	else:
+		$AnimatedSprite2D.flip_h = true
+
+	$AnimatedSprite2D.play(\"Derrota\")
+
+	await get_tree().create_timer(TIEMPO_DERROTA).timeout
+
+	global_position = posicion_inicial
+
+	velocity = Vector2.ZERO
+
+	vida = VIDA_MAXIMA
+
+	facing_direction = 1
+
+	$AnimatedSprite2D.flip_h = false
+
+	$DetectorVirus.monitoring = true
+	$DetectorVirus.monitorable = true
+
+	esta_derrotado = false
+
+	$AnimatedSprite2D.play(\"Quieta\")
 "
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_kqg6p"]
@@ -208,38 +425,57 @@ animations = [{
 "loop": false,
 "name": &"Salto",
 "speed": 5.0
-}, {
-"frames": [],
-"loop": true,
-"name": &"default",
-"speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_olyy6"]
-size = Vector2(12, 25)
+size = Vector2(18, 44)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8pjkx"]
-size = Vector2(12, 25)
+size = Vector2(18, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bmgmp"]
+size = Vector2(18, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_udx3f"]
+size = Vector2(14, 25)
 
 [node name="Lyn Personaje" type="CharacterBody2D" unique_id=888920584]
 collision_layer = 2
 script = SubResource("GDScript_mdx60")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=343663388]
-position = Vector2(-5.9604645e-08, 0)
-scale = Vector2(0.035125002, 0.032999996)
+position = Vector2(-5.9604645e-08, -4.038968e-28)
+scale = Vector2(0.06, 0.06)
 sprite_frames = SubResource("SpriteFrames_kqg6p")
-animation = &"Derrota"
+animation = &"Quieta"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1845727729]
-position = Vector2(0, -0.5)
 shape = SubResource("RectangleShape2D_olyy6")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=40730527]
-zoom = Vector2(5.5, 5.5)
+zoom = Vector2(4, 4)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=66140728]
+position = Vector2(16, 11)
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D" unique_id=2066181335]
-position = Vector2(0, -0.5)
+position = Vector2(-16, -13)
 shape = SubResource("RectangleShape2D_8pjkx")
+
+[node name="DetectorVirus" type="Area2D" parent="." unique_id=1775375541]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectorVirus" unique_id=2069860462]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_bmgmp")
+
+[node name="PegarDer" type="Area2D" parent="." unique_id=1734332253]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PegarDer" unique_id=1774400383]
+position = Vector2(9, -1.5)
+shape = SubResource("RectangleShape2D_udx3f")
+
+[node name="PegarIzq" type="Area2D" parent="." unique_id=945838065]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PegarIzq" unique_id=1218195498]
+position = Vector2(-9, -2)
+shape = SubResource("RectangleShape2D_udx3f")
