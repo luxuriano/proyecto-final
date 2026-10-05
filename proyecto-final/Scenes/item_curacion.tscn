@@ -5,25 +5,28 @@
 [sub_resource type="GDScript" id="GDScript_e156c"]
 script/source = "extends CharacterBody2D
 
-
 const GRAVEDAD = 980.0
 const CURACION = 1
 const VIDA_MAXIMA = 5
 const FUERZA_DROPEO = -250.0
 
 var es_dropeado = false
-
+var id_item = \"\"
 
 func _ready() -> void:
+
+	id_item = name
+
+	if id_item in GameState.items_recogidos:
+		queue_free()
+		return
 
 	var numero = randi_range(1, 100)
 
 	if numero <= 33:
 		$Sprite2D.texture = preload(\"res://Sprites ítems/Panchancis.png\")
-
 	elif numero <= 66:
 		$Sprite2D.texture = preload(\"res://Sprites ítems/Chocolatises.png\")
-
 	else:
 		$Sprite2D.texture = preload(\"res://Sprites ítems/Pera de Brian.png\")
 
@@ -43,19 +46,18 @@ func _physics_process(delta: float) -> void:
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
 
-	if body.name == \"Lyn Personaje\":
+	if body.name != \"Lyn Personaje\":
+		return
 
-		if body.vida < VIDA_MAXIMA:
+	if body.vida < VIDA_MAXIMA:
+		body.curar(CURACION)
+	else:
+		body.puntos += 200
 
-			body.curar(CURACION)
+	if id_item not in GameState.items_recogidos:
+		GameState.items_recogidos.append(id_item)
 
-			queue_free()
-
-		else:
-
-			body.puntos += 200
-
-			queue_free()
+	queue_free()
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rqbyb"]

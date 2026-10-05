@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6cwx736uj3c7"
-path="res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"
+uid="uid://suhqjrrxjuh0"
+path="res://.godot/imported/Portalrojo2.png-eb3983bd3fd01e702a499aa7e376428f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites estatuas/Estatuadinosaurio.png"
-dest_files=["res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"]
+source_file="res://Sprites estatuas/Portalrojo2.png"
+dest_files=["res://.godot/imported/Portalrojo2.png-eb3983bd3fd01e702a499aa7e376428f.ctex"]
 
 [params]
 

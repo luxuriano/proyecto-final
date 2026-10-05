@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6cwx736uj3c7"
-path="res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"
+uid="uid://dk583id10iicd"
+path="res://.godot/imported/Logo.png-0909ebcd92f516ca36dd0df542ed2e92.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites estatuas/Estatuadinosaurio.png"
-dest_files=["res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"]
+source_file="res://Sprites Menu/Logo.png"
+dest_files=["res://.godot/imported/Logo.png-0909ebcd92f516ca36dd0df542ed2e92.ctex"]
 
 [params]
 

@@ -4,11 +4,14 @@
 [ext_resource type="TileSet" uid="uid://cwddjicfnqpth" path="res://tileset/tilemap.tres" id="3_ad4ck"]
 [ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/lyn_personaje.tscn" id="3_wds2k"]
 [ext_resource type="PackedScene" uid="uid://ctx1qm0i7vg5l" path="res://Scenes/item_curacion.tscn" id="4_6txjk"]
+[ext_resource type="PackedScene" uid="uid://cdu6gp6y6gr75" path="res://Scenes/portal.tscn" id="4_w6yj6"]
 [ext_resource type="Texture2D" uid="uid://duukdr0rvgsme" path="res://Sprites interfaz/Cinco vidas.png" id="5_qumu6"]
+[ext_resource type="PackedScene" uid="uid://c42wklrga07xm" path="res://Scenes/PortalDestino.tscn" id="5_so2ju"]
 [ext_resource type="PackedScene" uid="uid://ciy0ymi2eqx3x" path="res://Scenes/Virus.tscn" id="6_8c1k5"]
+[ext_resource type="PackedScene" uid="uid://dkk56wf4tqpp4" path="res://Scenes/Portal_rojo_1.tscn" id="6_so2ju"]
 [ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="7_u3k4f"]
 [ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="8_d1n1d"]
-[ext_resource type="PackedScene" uid="uid://btqpt6jydtu3c" path="res://checkpoint.tscn" id="9_2sjnx"]
+[ext_resource type="PackedScene" uid="uid://btqpt6jydtu3c" path="res://Scenes/checkpoint.tscn" id="9_2sjnx"]
 
 [sub_resource type="GDScript" id="GDScript_6txjk"]
 script/source = "extends CanvasLayer
@@ -73,16 +76,29 @@ tile_map_data = PackedByteArray("AADw/wEAAAABAAUAAADx/wEAAAACAAEAAADy/wEAAAACAAE
 tile_set = ExtResource("3_ad4ck")
 
 [node name="Checkpoint" parent="." unique_id=2073786344 instance=ExtResource("9_2sjnx")]
-position = Vector2(261, -56)
+position = Vector2(259, -65)
 
-[node name="Lyn Personaje" parent="." unique_id=888920584 instance=ExtResource("3_wds2k")]
-position = Vector2(-92, -63)
+[node name="Checkpoint2" parent="." unique_id=63104306 instance=ExtResource("9_2sjnx")]
+position = Vector2(312, -81)
+
+[node name="Portal1" parent="." unique_id=536535781 instance=ExtResource("4_w6yj6")]
+position = Vector2(7, -19)
+
+[node name="Portal2" parent="." unique_id=1786282751 instance=ExtResource("5_so2ju")]
+position = Vector2(203, -54)
+
+[node name="PortalRojo1" parent="." unique_id=1653639409 instance=ExtResource("6_so2ju")]
+position = Vector2(148, -39)
 
 [node name="ItemCuracion" parent="." unique_id=1783509873 instance=ExtResource("4_6txjk")]
 position = Vector2(-34, -22)
 
 [node name="Virus" parent="." unique_id=1573749659 instance=ExtResource("6_8c1k5")]
 position = Vector2(94, -18)
+
+[node name="Lyn Personaje" parent="." unique_id=888920584 instance=ExtResource("3_wds2k")]
+position = Vector2(-92, -63)
+vida = 5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1003366572]
 script = SubResource("GDScript_6txjk")

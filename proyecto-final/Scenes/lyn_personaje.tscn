@@ -20,8 +20,8 @@
 [sub_resource type="GDScript" id="GDScript_mdx60"]
 script/source = "extends CharacterBody2D
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+const SPEED = 250.0
+const JUMP_VELOCITY = -350.0
 
 const DASH_SPEED = 1000.0
 const DASH_DURATION = 0.15
@@ -47,16 +47,48 @@ var ataque_cooldown_timer = 0.0
 
 var facing_direction = 1
 
-var vida = 4
+@export var vida = 5
 const VIDA_MAXIMA = 5
 
-var puntos = 0
+@export var puntos = 0
 
 var posicion_inicial: Vector2
+var posicion_checkpoint: Vector2
+var tiene_checkpoint = false
 
 
 func _ready() -> void:
+
 	posicion_inicial = global_position
+
+	if GameState.volviendo_desde_zona_virus:
+
+		vida = GameState.vida
+		puntos = GameState.puntos
+
+		var portal_salida = get_tree().current_scene.get_node_or_null(\"PortalSalida\")
+
+		if portal_salida != null:
+
+			var collision_shape = portal_salida.get_node_or_null(\"CollisionShape2D\")
+
+			if collision_shape != null:
+				global_position = collision_shape.global_position
+
+		if GameState.tiene_checkpoint:
+			posicion_checkpoint = GameState.posicion_checkpoint
+			tiene_checkpoint = true
+		else:
+			posicion_checkpoint = posicion_inicial
+
+	else:
+
+		posicion_checkpoint = posicion_inicial
+
+		if GameState.puntos > 0:
+			puntos = GameState.puntos
+
+	GameState.volviendo_desde_zona_virus = false
 
 	$AnimatedSprite2D.play(\"Quieta\")
 
@@ -75,12 +107,10 @@ func _physics_process(delta: float) -> void:
 	if ataque_cooldown_timer > 0:
 		ataque_cooldown_timer -= delta
 
-
 	if esta_derrotado:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
-
 
 	if esta_recibiendo_dano:
 		velocity = Vector2.ZERO
@@ -95,7 +125,6 @@ func _physics_process(delta: float) -> void:
 			actualizar_animacion()
 
 		return
-
 
 	if esta_atacando:
 		velocity = Vector2.ZERO
@@ -123,7 +152,6 @@ func _physics_process(delta: float) -> void:
 
 		move_and_slide()
 		return
-
 
 	if Input.is_action_just_pressed(\"ui_c\") and is_on_floor() and ataque_cooldown_timer <= 0:
 		esta_atacando = true
@@ -156,12 +184,10 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-
 	if Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
 		is_dashing = true
 		dash_timer = DASH_DURATION
 		dash_cooldown_timer = DASH_COOLDOWN
-
 
 	if is_dashing:
 		velocity.x = facing_direction * DASH_SPEED
@@ -182,17 +208,13 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-
 
 	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-
 	var direction := Input.get_axis(\"ui_left\", \"ui_right\")
-
 
 	if direction:
 		velocity.x = direction * SPEED
@@ -204,12 +226,10 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
-
 	if facing_direction == 1:
 		$AnimatedSprite2D.flip_h = false
 	else:
 		$AnimatedSprite2D.flip_h = true
-
 
 	actualizar_animacion()
 
@@ -219,20 +239,26 @@ func _physics_process(delta: float) -> void:
 func actualizar_animacion() -> void:
 
 	if not is_on_floor():
-
 		if velocity.y < 0:
 			$AnimatedSprite2D.play(\"Salto\")
 		else:
 			$AnimatedSprite2D.play(\"Caida\")
-
 	else:
-
 		var direction := Input.get_axis(\"ui_left\", \"ui_right\")
 
 		if direction != 0:
 			$AnimatedSprite2D.play(\"Moverse\")
 		else:
 			$AnimatedSprite2D.play(\"Quieta\")
+
+
+func activar_checkpoint(nueva_posicion: Vector2) -> void:
+
+	posicion_checkpoint = nueva_posicion
+	tiene_checkpoint = true
+
+	GameState.posicion_checkpoint = nueva_posicion
+	GameState.tiene_checkpoint = true
 
 
 func curar(cantidad: int) -> void:
@@ -303,6 +329,13 @@ func morir() -> void:
 	$DetectorVirus.monitoring = false
 	$DetectorVirus.monitorable = false
 
+	if puntos >= 500:
+		puntos -= 500
+	else:
+		puntos = 0
+
+	GameState.puntos = puntos
+
 	if facing_direction == 1:
 		$AnimatedSprite2D.flip_h = false
 	else:
@@ -312,7 +345,21 @@ func morir() -> void:
 
 	await get_tree().create_timer(TIEMPO_DERROTA).timeout
 
-	global_position = posicion_inicial
+	if GameState.esta_en_zona_virus:
+
+		GameState.vida = VIDA_MAXIMA
+		GameState.puntos = puntos
+		GameState.volviendo_desde_zona_virus = true
+		GameState.esta_en_zona_virus = false
+
+		get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
+
+		return
+
+	if tiene_checkpoint:
+		global_position = posicion_checkpoint
+	else:
+		global_position = posicion_inicial
 
 	velocity = Vector2.ZERO
 
@@ -453,7 +500,7 @@ animation = &"Quieta"
 shape = SubResource("RectangleShape2D_olyy6")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=40730527]
-zoom = Vector2(4, 4)
+zoom = Vector2(3, 3)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=66140728]
 position = Vector2(16, 11)

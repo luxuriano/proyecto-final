@@ -1,6 +1,5 @@
 extends CharacterBody2D
 
-
 const VELOCIDAD = 100.0
 const GRAVEDAD = 980.0
 
@@ -40,6 +39,10 @@ var esta_muerto = false
 
 
 func _ready() -> void:
+
+	if name in GameState.virus_derrotados:
+		queue_free()
+		return
 
 	$PuntoAtaqueIzq.monitoring = true
 	$PuntoAtaqueDer.monitoring = true
@@ -299,6 +302,12 @@ func morir() -> void:
 
 
 	esta_muerto = true
+
+	if name not in GameState.virus_derrotados:
+		GameState.virus_derrotados.append(name)
+
+	collision_layer = 0
+	collision_mask = 0
 
 	recibiendo_dano = false
 	preparando_ataque = false

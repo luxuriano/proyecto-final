@@ -92,7 +92,7 @@ animations = [{
 size = Vector2(1108.0001, 937.53845)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yvhlv"]
-size = Vector2(303, 10)
+size = Vector2(397, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bgqyf"]
 size = Vector2(12, 11)
@@ -101,7 +101,8 @@ size = Vector2(12, 11)
 size = Vector2(24, 41)
 
 [node name="Virus" type="CharacterBody2D" unique_id=1902695209]
-collision_layer = 2
+collision_layer = 6
+collision_mask = 5
 script = ExtResource("1_0lgdo")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=911085683]
@@ -118,7 +119,7 @@ shape = SubResource("RectangleShape2D_73h84")
 [node name="RangoVision" type="Area2D" parent="." unique_id=1010466248]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=760623455]
-position = Vector2(0, 15)
+position = Vector2(0.5, 15)
 shape = SubResource("RectangleShape2D_yvhlv")
 
 [node name="PuntoAtaqueIzq" type="Area2D" parent="." unique_id=762812244]

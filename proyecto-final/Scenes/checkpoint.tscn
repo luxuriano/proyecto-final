@@ -1,41 +1,51 @@
 [gd_scene format=3 uid="uid://btqpt6jydtu3c"]
 
-[ext_resource type="Texture2D" uid="uid://bxgr4mg28j1u5" path="res://Sprites estatuas/Estatuadinosaurio.png" id="1_luqgl"]
+[ext_resource type="Texture2D" uid="uid://cuowfium82sde" path="res://Sprites estatuas/Estatuarobot.png" id="1_luqgl"]
 
 [sub_resource type="GDScript" id="GDScript_r6hke"]
 script/source = "extends Area2D
+
 
 var ya_usado = false
 
 
 func _ready() -> void:
-	add_to_group(\"checkpoints\")
-	body_entered.connect(_on_body_entered)
+	monitoring = true
+	monitorable = true
 
 
-func _on_body_entered(body: Node2D) -> void:
+func _physics_process(_delta: float) -> void:
+
 	if ya_usado:
 		return
 
-	if body.name != \"Lyn Personaje\":
+	var cuerpos = get_overlapping_bodies()
+
+	for cuerpo in cuerpos:
+
+		if cuerpo.name != \"Lyn Personaje\":
+			continue
+
+		if not cuerpo.has_method(\"activar_checkpoint\"):
+			continue
+
+		activar_checkpoint(cuerpo)
+
+
+func activar_checkpoint(lyn: Node2D) -> void:
+
+	if ya_usado:
 		return
 
-	if not body.has_method(\"recibir_dano\"):
-		return
+	var posicion = global_position + Vector2(0, -20)
 
-	for checkpoint in get_tree().get_nodes_in_group(\"checkpoints\"):
-		if checkpoint != self:
-			checkpoint.desactivar_checkpoint()
+	lyn.activar_checkpoint(posicion)
 
-	body.posicion_inicial = global_position + Vector2(0, -20)
+	GameState.posicion_checkpoint = posicion
+	GameState.tiene_checkpoint = true
 
 	ya_usado = true
-	monitoring = false
-	monitorable = false
 
-
-func desactivar_checkpoint() -> void:
-	ya_usado = true
 	monitoring = false
 	monitorable = false
 "
@@ -44,12 +54,12 @@ func desactivar_checkpoint() -> void:
 size = Vector2(49, 92)
 
 [node name="Checkpoint" type="Area2D" unique_id=2073786344]
-collision_layer = 2
+collision_mask = 2
 script = SubResource("GDScript_r6hke")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1504670346]
 position = Vector2(0, -1.5)
-scale = Vector2(0.05, 0.047000002)
+scale = Vector2(0.07, 0.066)
 texture = ExtResource("1_luqgl")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1801197303]

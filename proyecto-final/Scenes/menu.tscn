@@ -1,0 +1,268 @@
+[gd_scene format=3 uid="uid://dnfauvkt3db5p"]
+
+[ext_resource type="Texture2D" uid="uid://dyffulv11n4ej" path="res://Sprites Menu/Fondo menu.png" id="1_cayip"]
+[ext_resource type="Texture2D" uid="uid://xulqk4476wic" path="res://Sprites Menu/Escuela menu.png" id="2_158mb"]
+[ext_resource type="Texture2D" uid="uid://dk583id10iicd" path="res://Sprites Menu/Logo.png" id="3_wwsa2"]
+[ext_resource type="Texture2D" uid="uid://bp2mc4qvqttbg" path="res://Sprites interfaz/Sprites botones/Boton rectangular.png" id="4_158mb"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_wwsa2"]
+
+[sub_resource type="GDScript" id="GDScript_jsrd8"]
+script/source = "extends Node2D
+
+@onready var nueva_partida = $NuevaPartida
+@onready var continuar_partida = $ContinuarPartida
+@onready var salir = $Salir
+@onready var ventana_nueva_partida = $VentanaNuevaPartida
+@onready var confirmar = $VentanaNuevaPartida/Confirmar
+@onready var cancelar = $VentanaNuevaPartida/Cancelar
+
+func _ready() -> void:
+	ventana_nueva_partida.visible = false
+
+	nueva_partida.pressed.connect(_on_nueva_partida_pressed)
+	continuar_partida.pressed.connect(_on_continuar_partida_pressed)
+	salir.pressed.connect(_on_salir_pressed)
+	confirmar.pressed.connect(_on_confirmar_pressed)
+	cancelar.pressed.connect(_on_cancelar_pressed)
+
+func _on_nueva_partida_pressed() -> void:
+	ventana_nueva_partida.visible = true
+
+func _on_continuar_partida_pressed() -> void:
+	get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
+
+func _on_salir_pressed() -> void:
+	get_tree().quit()
+
+func _on_confirmar_pressed() -> void:
+	GameState.vida = 5
+	GameState.puntos = 0
+	GameState.tiene_checkpoint = false
+	GameState.posicion_checkpoint = Vector2.ZERO
+	GameState.esta_en_zona_virus = false
+	GameState.volviendo_desde_zona_virus = false
+	GameState.items_recogidos.clear()
+	GameState.virus_derrotados.clear()
+	GameState.zona_virus_completada = false
+
+	get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
+
+func _on_cancelar_pressed() -> void:
+	ventana_nueva_partida.visible = false
+"
+
+[sub_resource type="GDScript" id="GDScript_wwsa2"]
+script/source = "extends TextureButton
+
+var escala_normal = Vector2(0.1, 0.08)
+var escala_hover = Vector2(0.11, 0.088)
+var escala_presionada = Vector2(0.095, 0.076)
+
+func _ready() -> void:
+	scale = escala_normal
+
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	button_down.connect(_on_button_down)
+	button_up.connect(_on_button_up)
+
+func _on_mouse_entered() -> void:
+	scale = escala_hover
+
+func _on_mouse_exited() -> void:
+	scale = escala_normal
+
+func _on_button_down() -> void:
+	scale = escala_presionada
+
+func _on_button_up() -> void:
+	if is_hovered():
+		scale = escala_hover
+	else:
+		scale = escala_normal
+"
+
+[sub_resource type="GDScript" id="GDScript_158mb"]
+script/source = "extends TextureButton
+
+var escala_normal = Vector2(0.3, 0.16)
+var escala_hover = Vector2(0.33, 0.176)
+var escala_presionada = Vector2(0.285, 0.152)
+
+func _ready() -> void:
+	scale = escala_normal
+
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	button_down.connect(_on_button_down)
+	button_up.connect(_on_button_up)
+
+func _on_mouse_entered() -> void:
+	scale = escala_hover
+
+func _on_mouse_exited() -> void:
+	scale = escala_normal
+
+func _on_button_down() -> void:
+	scale = escala_presionada
+
+func _on_button_up() -> void:
+	if is_hovered():
+		scale = escala_hover
+	else:
+		scale = escala_normal
+"
+
+[node name="Menu" type="Node2D" unique_id=787354257]
+script = SubResource("GDScript_jsrd8")
+
+[node name="Fondo Cielo" type="Sprite2D" parent="." unique_id=1268639329]
+z_index = -10
+position = Vector2(576, 324.99997)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("1_cayip")
+
+[node name="Fondo Escuela" type="Sprite2D" parent="." unique_id=1285082359]
+z_index = -9
+position = Vector2(576, 324.99997)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_158mb")
+
+[node name="Logo" type="Sprite2D" parent="." unique_id=745154272]
+position = Vector2(577, 328)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("3_wwsa2")
+
+[node name="NuevaPartida" type="TextureButton" parent="." unique_id=1818556261]
+offset_left = 487.0
+offset_top = 336.99997
+offset_right = 2487.0
+offset_bottom = 1337.0
+scale = Vector2(0.1, 0.06)
+texture_normal = ExtResource("4_158mb")
+texture_pressed = ExtResource("4_158mb")
+texture_hover = ExtResource("4_158mb")
+script = SubResource("GDScript_wwsa2")
+
+[node name="Label" type="Label" parent="NuevaPartida" unique_id=188630949]
+layout_mode = 0
+offset_left = 109.999985
+offset_top = 316.66702
+offset_right = 2039.0
+offset_bottom = 761.667
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 280
+text = "NUEVA PARTIDA"
+
+[node name="ContinuarPartida" type="TextureButton" parent="." unique_id=258758237]
+offset_left = 487.0
+offset_top = 434.0
+offset_right = 2487.0
+offset_bottom = 1434.0
+scale = Vector2(0.1, 0.06)
+texture_normal = ExtResource("4_158mb")
+texture_pressed = ExtResource("4_158mb")
+texture_hover = ExtResource("4_158mb")
+script = SubResource("GDScript_wwsa2")
+
+[node name="Label" type="Label" parent="ContinuarPartida" unique_id=1486296189]
+layout_mode = 0
+offset_left = 99.999985
+offset_top = 349.99985
+offset_right = 2029.0
+offset_bottom = 794.9998
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 214
+text = "CONTINUAR PARTIDA"
+
+[node name="Salir" type="TextureButton" parent="." unique_id=722583383]
+offset_left = 487.0
+offset_top = 531.0
+offset_right = 2487.0
+offset_bottom = 1531.0
+scale = Vector2(0.1, 0.06)
+texture_normal = ExtResource("4_158mb")
+texture_pressed = ExtResource("4_158mb")
+texture_hover = ExtResource("4_158mb")
+script = SubResource("GDScript_wwsa2")
+
+[node name="Label" type="Label" parent="Salir" unique_id=1797145189]
+layout_mode = 0
+offset_left = 590.0
+offset_top = 316.66702
+offset_right = 2519.0
+offset_bottom = 761.667
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 280
+text = "SALIR"
+
+[node name="VentanaNuevaPartida" type="TextureRect" parent="." unique_id=1732113962]
+visible = false
+offset_left = 180.0
+offset_top = 204.0
+offset_right = 2180.0
+offset_bottom = 1204.0
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("4_158mb")
+
+[node name="Label" type="Label" parent="VentanaNuevaPartida" unique_id=2021805660]
+layout_mode = 0
+offset_left = 182.49997
+offset_top = 130.0
+offset_right = 2378.5
+offset_bottom = 598.333
+scale = Vector2(0.8, 1)
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 94
+text = "¿SEGURO QUE QUIERES INICIAR UNA NUEVA PARTIDA?
+CUALQUIER PARTIDA GUARDADA SE BORRARÁ."
+
+[node name="Confirmar" type="TextureButton" parent="VentanaNuevaPartida" unique_id=1420153770]
+layout_mode = 0
+offset_left = 237.50003
+offset_top = 620.0
+offset_right = 2237.5
+offset_bottom = 1620.0
+scale = Vector2(0.3, 0.16)
+texture_normal = ExtResource("4_158mb")
+texture_pressed = ExtResource("4_158mb")
+texture_hover = ExtResource("4_158mb")
+script = SubResource("GDScript_158mb")
+
+[node name="Label" type="Label" parent="VentanaNuevaPartida/Confirmar" unique_id=1895047216]
+layout_mode = 0
+offset_left = 299.99988
+offset_top = 265.62494
+offset_right = 2229.0
+offset_bottom = 710.6249
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 280
+text = "CONFIRMAR"
+
+[node name="Cancelar" type="TextureButton" parent="VentanaNuevaPartida" unique_id=88459004]
+layout_mode = 0
+offset_left = 1182.5
+offset_top = 620.0
+offset_right = 3182.5
+offset_bottom = 1620.0
+scale = Vector2(0.3, 0.16)
+texture_normal = ExtResource("4_158mb")
+texture_pressed = ExtResource("4_158mb")
+texture_hover = ExtResource("4_158mb")
+script = SubResource("GDScript_158mb")
+
+[node name="Label" type="Label" parent="VentanaNuevaPartida/Cancelar" unique_id=527143524]
+layout_mode = 0
+offset_left = 358.3332
+offset_top = 265.62494
+offset_right = 2287.3333
+offset_bottom = 710.6249
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_wwsa2")
+theme_override_font_sizes/font_size = 280
+text = "CANCELAR"

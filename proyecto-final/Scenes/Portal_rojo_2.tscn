@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://bfy5pq0nyh18w"]
+
+[ext_resource type="Texture2D" uid="uid://df2virb5n87t1" path="res://Sprites estatuas/Portalrojo1.png" id="1_0ryb8"]
+[ext_resource type="Texture2D" uid="uid://suhqjrrxjuh0" path="res://Sprites estatuas/Portalrojo2.png" id="2_cpbr4"]
+[ext_resource type="Texture2D" uid="uid://bu16j44co1ok4" path="res://Sprites estatuas/Portalrojo3.png" id="3_wea8w"]
+[ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="4_0n8tu"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_h741l"]
+
+[sub_resource type="GDScript" id="GDScript_0ryb8"]
+script/source = "extends Area2D
+
+var lyn_actual = null
+var puede_salir = true
+
+@onready var label = $Label
+@onready var boton_e = $BotonE
+@onready var animated_sprite = $AnimatedSprite2D
+
+func _ready() -> void:
+
+	label.visible = false
+	boton_e.visible = false
+
+	animated_sprite.play(\"PortalSalida\")
+
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+
+func _process(_delta: float) -> void:
+
+	if lyn_actual == null:
+		return
+
+	if not puede_salir:
+		return
+
+	if Input.is_action_just_pressed(\"ui_e\"):
+
+		salir_de_zona_virus()
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	lyn_actual = body
+
+	label.visible = true
+	boton_e.visible = true
+
+func _on_body_exited(body: Node2D) -> void:
+
+	if body != lyn_actual:
+		return
+
+	lyn_actual = null
+
+	label.visible = false
+	boton_e.visible = false
+
+func salir_de_zona_virus() -> void:
+
+	if lyn_actual == null:
+		return
+
+	if not puede_salir:
+		return
+
+	puede_salir = false
+
+	GameState.vida = lyn_actual.vida
+	GameState.puntos = lyn_actual.puntos
+
+	GameState.zona_virus_completada = true
+	GameState.esta_en_zona_virus = false
+
+	GameState.volviendo_desde_zona_virus = true
+
+	get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0rfwq"]
+animations = [{
+"frames": [{
+"duration": 1.5,
+"texture": ExtResource("1_0ryb8")
+}, {
+"duration": 1.5,
+"texture": ExtResource("2_cpbr4")
+}, {
+"duration": 1.5,
+"texture": ExtResource("3_wea8w")
+}],
+"loop": true,
+"name": &"PortalSalida",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cmb8q"]
+size = Vector2(41, 58.5)
+
+[node name="PortalRojo2" type="Area2D" unique_id=1067587610]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_0ryb8")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=180615627]
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_0rfwq")
+animation = &"PortalSalida"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=351708995]
+position = Vector2(0, -0.75)
+shape = SubResource("RectangleShape2D_cmb8q")
+
+[node name="BotonE" type="Sprite2D" parent="." unique_id=389312785]
+position = Vector2(0, -32)
+scale = Vector2(0.01, 0.01)
+texture = ExtResource("4_0n8tu")
+
+[node name="Label" type="Label" parent="." unique_id=2147272988]
+offset_left = -2.0
+offset_top = -39.0
+offset_right = 38.0
+offset_bottom = -16.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_h741l")
+theme_override_font_sizes/font_size = 8
+text = "E"

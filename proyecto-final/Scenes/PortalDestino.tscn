@@ -1,0 +1,124 @@
+[gd_scene format=3 uid="uid://c42wklrga07xm"]
+
+[ext_resource type="Texture2D" uid="uid://cifqvbm0uq2q6" path="res://Sprites estatuas/Portalazul1.png" id="1_hdjuj"]
+[ext_resource type="Texture2D" uid="uid://bm6k6n2coerbp" path="res://Sprites estatuas/Portalazul2.png" id="2_61lng"]
+[ext_resource type="Texture2D" uid="uid://pck6jie7cmeh" path="res://Sprites estatuas/Portalazul3.png" id="3_ji2um"]
+[ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="4_okxxl"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_220x6"]
+
+[sub_resource type="GDScript" id="GDScript_hdjuj"]
+script/source = "extends Area2D
+
+var lyn_actual = null
+var puede_teletransportar = true
+
+@onready var label = $Label
+@onready var boton_e = $BotonE
+@onready var animated_sprite = $AnimatedSprite2D
+
+
+func _ready() -> void:
+	label.visible = false
+	boton_e.visible = false
+
+	animated_sprite.play(\"Portal\")
+
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+
+
+func _process(_delta: float) -> void:
+	if lyn_actual != null and puede_teletransportar:
+		if Input.is_action_just_pressed(\"ui_e\"):
+			teletransportar()
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if body.name != \"Lyn Personaje\":
+		return
+
+	lyn_actual = body
+
+	label.visible = true
+	boton_e.visible = true
+
+
+func _on_body_exited(body: Node2D) -> void:
+	if body == lyn_actual:
+		lyn_actual = null
+
+		label.visible = false
+		boton_e.visible = false
+
+
+func teletransportar() -> void:
+	if lyn_actual == null:
+		return
+
+	var destino = null
+
+	if name == \"Portal1\":
+		destino = get_tree().current_scene.get_node_or_null(\"Portal2\")
+	elif name == \"Portal2\":
+		destino = get_tree().current_scene.get_node_or_null(\"Portal1\")
+
+	if destino == null:
+		return
+
+	puede_teletransportar = false
+
+	lyn_actual.global_position = destino.global_position + Vector2(0, -60)
+
+	await get_tree().create_timer(0.5).timeout
+
+	puede_teletransportar = true
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mfgij"]
+animations = [{
+"frames": [{
+"duration": 1.5,
+"texture": ExtResource("1_hdjuj")
+}, {
+"duration": 1.5,
+"texture": ExtResource("2_61lng")
+}, {
+"duration": 1.5,
+"texture": ExtResource("3_ji2um")
+}],
+"loop": true,
+"name": &"Portal",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t1p48"]
+size = Vector2(40, 60)
+
+[node name="Portal2" type="Area2D" unique_id=1786282751]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_hdjuj")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1085975013]
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_mfgij")
+animation = &"Portal"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=180203959]
+position = Vector2(-0.5, -1)
+shape = SubResource("RectangleShape2D_t1p48")
+
+[node name="BotonE" type="Sprite2D" parent="." unique_id=618733628]
+position = Vector2(0, -32)
+scale = Vector2(0.01, 0.01)
+texture = ExtResource("4_okxxl")
+
+[node name="Label" type="Label" parent="." unique_id=82125776]
+offset_left = -2.0
+offset_top = -39.0
+offset_right = 38.0
+offset_bottom = -16.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_220x6")
+theme_override_font_sizes/font_size = 8
+text = "E"

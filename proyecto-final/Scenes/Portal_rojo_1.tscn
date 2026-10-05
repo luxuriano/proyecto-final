@@ -1,0 +1,141 @@
+[gd_scene format=3 uid="uid://dkk56wf4tqpp4"]
+
+[ext_resource type="Texture2D" uid="uid://df2virb5n87t1" path="res://Sprites estatuas/Portalrojo1.png" id="1_pekn8"]
+[ext_resource type="Texture2D" uid="uid://suhqjrrxjuh0" path="res://Sprites estatuas/Portalrojo2.png" id="2_1qmw2"]
+[ext_resource type="Texture2D" uid="uid://bu16j44co1ok4" path="res://Sprites estatuas/Portalrojo3.png" id="3_ilj1t"]
+[ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="4_indmb"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_6abl4"]
+
+[sub_resource type="GDScript" id="GDScript_pekn8"]
+script/source = "extends Area2D
+
+var lyn_actual = null
+
+@onready var label = $Label
+@onready var boton_e = $BotonE
+@onready var animated_sprite = $AnimatedSprite2D
+
+
+func _ready() -> void:
+
+	if GameState.zona_virus_completada:
+		queue_free()
+		return
+
+	label.visible = false
+	boton_e.visible = false
+
+	animated_sprite.play(\"Portal\")
+
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+
+
+func _process(_delta: float) -> void:
+
+	if lyn_actual == null:
+		return
+
+	if Input.is_action_just_pressed(\"ui_e\"):
+
+		print(\"E DETECTADA EN PORTAL\")
+
+		entrar_a_zona_virus()
+
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	lyn_actual = body
+
+	label.visible = true
+	boton_e.visible = true
+
+	print(\"LYN ENTRO AL PORTAL\")
+
+
+func _on_body_exited(body: Node2D) -> void:
+
+	if body != lyn_actual:
+		return
+
+	lyn_actual = null
+
+	label.visible = false
+	boton_e.visible = false
+
+	print(\"LYN SALIO DEL PORTAL\")
+
+
+func entrar_a_zona_virus() -> void:
+
+	if lyn_actual == null:
+		return
+
+	GameState.vida = lyn_actual.vida
+	GameState.puntos = lyn_actual.puntos
+
+	GameState.esta_en_zona_virus = true
+	GameState.volviendo_desde_zona_virus = false
+
+	print(\"VIDA GUARDADA: \", GameState.vida)
+	print(\"PUNTOS GUARDADOS: \", GameState.puntos)
+
+	var resultado = get_tree().change_scene_to_file(\"res://Scenes/zona_virus.tscn\")
+
+	print(\"RESULTADO CAMBIO DE ESCENA: \", resultado)
+
+	if resultado != OK:
+		print(\"ERROR: NO SE PUDO CARGAR zona_virus.tscn\")
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0rfwq"]
+animations = [{
+"frames": [{
+"duration": 1.5,
+"texture": ExtResource("1_pekn8")
+}, {
+"duration": 1.5,
+"texture": ExtResource("2_1qmw2")
+}, {
+"duration": 1.5,
+"texture": ExtResource("3_ilj1t")
+}],
+"loop": true,
+"name": &"Portal",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cmb8q"]
+size = Vector2(41, 58.5)
+
+[node name="PortalRojo1" type="Area2D" unique_id=1653639409]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_pekn8")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1189756658]
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_0rfwq")
+animation = &"Portal"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=752220839]
+position = Vector2(0, -0.75)
+shape = SubResource("RectangleShape2D_cmb8q")
+
+[node name="BotonE" type="Sprite2D" parent="." unique_id=1570780019]
+position = Vector2(0, -32)
+scale = Vector2(0.01, 0.01)
+texture = ExtResource("4_indmb")
+
+[node name="Label" type="Label" parent="." unique_id=1899073050]
+offset_left = -2.0
+offset_top = -39.0
+offset_right = 38.0
+offset_bottom = -16.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("5_6abl4")
+theme_override_font_sizes/font_size = 8
+text = "E"

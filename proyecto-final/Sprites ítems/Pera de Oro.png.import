@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6cwx736uj3c7"
-path="res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"
+uid="uid://di6ceg0hduy0p"
+path="res://.godot/imported/Pera de Oro.png-27819e0960806ebae7d6cb45acb58d60.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites estatuas/Estatuadinosaurio.png"
-dest_files=["res://.godot/imported/Estatuadinosaurio.png-12c245dd9b9c2aa768c1e46d024ba4ab.ctex"]
+source_file="res://Sprites ítems/Pera de Oro.png"
+dest_files=["res://.godot/imported/Pera de Oro.png-27819e0960806ebae7d6cb45acb58d60.ctex"]
 
 [params]
 
