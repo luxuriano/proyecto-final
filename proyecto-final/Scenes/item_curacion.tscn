@@ -69,15 +69,16 @@ radius = 3.0
 height = 10.0
 
 [node name="ItemCuracion" type="CharacterBody2D" unique_id=645194602]
-collision_layer = 4
+collision_layer = 8
 script = SubResource("GDScript_e156c")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1969951704]
-scale = Vector2(0.0139999995, 0.0135)
+scale = Vector2(0.07, 0.07)
 texture = ExtResource("1_rqbyb")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=1261002742]
 position = Vector2(0, 1)
+scale = Vector2(7, 7)
 shape = SubResource("CapsuleShape2D_rqbyb")
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1135603155]
@@ -86,6 +87,7 @@ collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1082622225]
 position = Vector2(-12, -13)
+scale = Vector2(6, 6)
 shape = SubResource("CapsuleShape2D_vh3uo")
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

@@ -89,16 +89,16 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_73h84"]
-size = Vector2(1108.0001, 937.53845)
+size = Vector2(970, 728.9719)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yvhlv"]
 size = Vector2(397, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bgqyf"]
-size = Vector2(12, 11)
+size = Vector2(13, 11)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0lgdo"]
-size = Vector2(24, 41)
+size = Vector2(96, 156)
 
 [node name="Virus" type="CharacterBody2D" unique_id=1902695209]
 collision_layer = 6
@@ -107,35 +107,39 @@ script = ExtResource("1_0lgdo")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=911085683]
 position = Vector2(-2.3841858e-07, 0)
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.2, 0.2)
 sprite_frames = SubResource("SpriteFrames_vs7n5")
 animation = &"Virusquieto"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888202289]
-position = Vector2(1.0000002, -1.9999998)
-scale = Vector2(0.021660646, 0.04693141)
+position = Vector2(6.5000005, -3)
+scale = Vector2(0.1, 0.214)
 shape = SubResource("RectangleShape2D_73h84")
 
 [node name="RangoVision" type="Area2D" parent="." unique_id=1010466248]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=760623455]
-position = Vector2(0.5, 15)
+position = Vector2(1, 54)
+scale = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_yvhlv")
 
 [node name="PuntoAtaqueIzq" type="Area2D" parent="." unique_id=762812244]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PuntoAtaqueIzq" unique_id=2028906593]
-position = Vector2(-9, -3)
+position = Vector2(-34, -12)
+scale = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_bgqyf")
 
 [node name="PuntoAtaqueDer" type="Area2D" parent="." unique_id=1784415077]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PuntoAtaqueDer" unique_id=987100181]
-position = Vector2(11, -3)
+position = Vector2(36, -12)
+scale = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_bgqyf")
 
 [node name="RangoPegar" type="Area2D" parent="." unique_id=2041082206]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoPegar" unique_id=1466234067]
-position = Vector2(1, -3.5)
+visible = false
+position = Vector2(6, -3)
 shape = SubResource("RectangleShape2D_0lgdo")

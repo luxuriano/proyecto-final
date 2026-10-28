@@ -11,5 +11,6 @@ var volviendo_desde_zona_virus = false
 
 var items_recogidos = []
 var virus_derrotados = []
+var monedas_recogidas = []
 
 var zona_virus_completada = false

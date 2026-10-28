@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const VELOCIDAD = 100.0
+const VELOCIDAD = 300.0
 const GRAVEDAD = 980.0
 
 const TIEMPO_PREPARACION_ATAQUE = 0.8

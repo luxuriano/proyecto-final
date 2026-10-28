@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://dbl7xea4crc6j"]
+
+[ext_resource type="Texture2D" uid="uid://bq67hb2anq1gq" path="res://Sprites ítems/Moneda.png" id="1_gvj4e"]
+
+[sub_resource type="GDScript" id="GDScript_j5x4i"]
+script/source = "
+extends Area2D
+
+const PUNTOS = 100
+
+var id_moneda = \"\"
+var recogida = false
+
+func _ready() -> void:
+	id_moneda = str(get_path())
+
+	if id_moneda in GameState.monedas_recogidas:
+		queue_free()
+		return
+
+	body_entered.connect(_on_body_entered)
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if recogida:
+		return
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	recogida = true
+
+	body.puntos += PUNTOS
+	GameState.puntos = body.puntos
+
+	if id_moneda not in GameState.monedas_recogidas:
+		GameState.monedas_recogidas.append(id_moneda)
+
+	queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_wder7"]
+radius = 13.0
+
+[node name="Moneda" type="Area2D" unique_id=1391369748]
+collision_mask = 2
+script = SubResource("GDScript_j5x4i")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=842997128]
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("1_gvj4e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1727195156]
+scale = Vector2(3, 3)
+shape = SubResource("CircleShape2D_wder7")
