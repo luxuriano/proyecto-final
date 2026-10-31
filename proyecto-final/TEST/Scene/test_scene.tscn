@@ -98,7 +98,6 @@ position = Vector2(94, -18)
 
 [node name="Lyn Personaje" parent="." unique_id=888920584 instance=ExtResource("3_wds2k")]
 position = Vector2(-92, -63)
-vida = 5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1003366572]
 script = SubResource("GDScript_6txjk")

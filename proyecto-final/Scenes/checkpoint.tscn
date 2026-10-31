@@ -13,23 +13,21 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = true
 
+	body_entered.connect(_on_body_entered)
 
-func _physics_process(_delta: float) -> void:
+
+func _on_body_entered(cuerpo: Node2D) -> void:
 
 	if ya_usado:
 		return
 
-	var cuerpos = get_overlapping_bodies()
+	if cuerpo.name != \"Lyn Personaje\":
+		return
 
-	for cuerpo in cuerpos:
+	if not cuerpo.has_method(\"activar_checkpoint\"):
+		return
 
-		if cuerpo.name != \"Lyn Personaje\":
-			continue
-
-		if not cuerpo.has_method(\"activar_checkpoint\"):
-			continue
-
-		activar_checkpoint(cuerpo)
+	activar_checkpoint(cuerpo)
 
 
 func activar_checkpoint(lyn: Node2D) -> void:
@@ -46,8 +44,8 @@ func activar_checkpoint(lyn: Node2D) -> void:
 
 	ya_usado = true
 
-	monitoring = false
-	monitorable = false
+	set_deferred(\"monitoring\", false)
+	set_deferred(\"monitorable\", false)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tnhlw"]

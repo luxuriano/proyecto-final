@@ -37,10 +37,16 @@ var golpe_ya_recibido = false
 
 var esta_muerto = false
 
+var id_virus = ""
+
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+
 
 func _ready() -> void:
 
-	if name in GameState.virus_derrotados:
+	id_virus = str(get_path())
+
+	if id_virus in GameState.virus_derrotados:
 		queue_free()
 		return
 
@@ -50,8 +56,8 @@ func _ready() -> void:
 	$RangoPegar.monitoring = true
 	$RangoPegar.monitorable = true
 
-	$AnimatedSprite2D.play("Virusquieto")
-	$AnimatedSprite2D.flip_h = false
+	sprite.play("Virusquieto")
+	sprite.flip_h = false
 
 
 func _physics_process(delta: float) -> void:
@@ -77,7 +83,7 @@ func _physics_process(delta: float) -> void:
 
 		tiempo_dano -= delta
 
-		$AnimatedSprite2D.flip_h = flip_dano
+		sprite.flip_h = flip_dano
 
 		if tiempo_dano <= 0:
 
@@ -291,8 +297,8 @@ func recibir_dano_de_lyn(reflejar: bool) -> void:
 
 	flip_dano = reflejar
 
-	$AnimatedSprite2D.flip_h = flip_dano
-	$AnimatedSprite2D.play("Virusdaño")
+	sprite.flip_h = flip_dano
+	sprite.play("Virusdaño")
 
 
 func morir() -> void:
@@ -303,8 +309,8 @@ func morir() -> void:
 
 	esta_muerto = true
 
-	if name not in GameState.virus_derrotados:
-		GameState.virus_derrotados.append(name)
+	if id_virus not in GameState.virus_derrotados:
+		GameState.virus_derrotados.append(id_virus)
 
 	collision_layer = 0
 	collision_mask = 0
@@ -331,13 +337,13 @@ func morir() -> void:
 
 	if mirando_derecha:
 
-		$AnimatedSprite2D.flip_h = true
+		sprite.flip_h = true
 
 	else:
 
-		$AnimatedSprite2D.flip_h = false
+		sprite.flip_h = false
 
-	$AnimatedSprite2D.play("Virusmuerte")
+	sprite.play("Virusmuerte")
 
 
 	if randf() <= 0.25:
@@ -436,15 +442,15 @@ func actualizar_ataque(delta: float) -> void:
 		if punto_ataque_actual == $PuntoAtaqueDer:
 
 			mirando_derecha = true
-			$AnimatedSprite2D.flip_h = true
+			sprite.flip_h = true
 
 		else:
 
 			mirando_derecha = false
-			$AnimatedSprite2D.flip_h = false
+			sprite.flip_h = false
 
 
-		$AnimatedSprite2D.play("Virusataque")
+		sprite.play("Virusataque")
 
 
 	tiempo_preparacion -= delta
@@ -507,7 +513,7 @@ func atacar() -> void:
 	tiempo_cooldown = TIEMPO_COOLDOWN_ATAQUE
 
 
-	await $AnimatedSprite2D.animation_finished
+	await sprite.animation_finished
 
 
 	if esta_muerto:
@@ -527,20 +533,20 @@ func actualizar_animacion() -> void:
 
 	if velocity.x != 0:
 
-		$AnimatedSprite2D.play("Virusmover")
+		sprite.play("Virusmover")
 
 	else:
 
-		$AnimatedSprite2D.play("Virusquieto")
+		sprite.play("Virusquieto")
 
 
 	if mirando_derecha:
 
-		$AnimatedSprite2D.flip_h = true
+		sprite.flip_h = true
 
 	else:
 
-		$AnimatedSprite2D.flip_h = false
+		sprite.flip_h = false
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:

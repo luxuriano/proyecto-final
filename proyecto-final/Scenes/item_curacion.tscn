@@ -15,9 +15,11 @@ var id_item = \"\"
 
 func _ready() -> void:
 
-	id_item = name
+	# Solo los items puestos en el nivel se recuerdan (los que sueltan los virus no)
+	if owner != null:
+		id_item = str(get_path())
 
-	if id_item in GameState.items_recogidos:
+	if id_item != \"\" and id_item in GameState.items_recogidos:
 		queue_free()
 		return
 
@@ -54,7 +56,7 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 	else:
 		body.puntos += 200
 
-	if id_item not in GameState.items_recogidos:
+	if id_item != \"\" and id_item not in GameState.items_recogidos:
 		GameState.items_recogidos.append(id_item)
 
 	queue_free()

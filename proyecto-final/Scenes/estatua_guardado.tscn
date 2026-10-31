@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://xwl64fksjla2"]
+
+[ext_resource type="Script" uid="uid://dmf5nqlp37lff" path="res://Guardado/save.gd" id="1_save"]
+[ext_resource type="Texture2D" uid="uid://6cwx736uj3c7" path="res://Sprites estatuas/Estatuadinosaurio.png" id="2_dino"]
+[ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="3_boton"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="4_fuente"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dino"]
+size = Vector2(39.666668, 65.66667)
+
+[node name="EstatuaGuardado" type="Area2D" unique_id=1296425215]
+texture_filter = 1
+scale = Vector2(3, 3)
+collision_mask = 2
+script = ExtResource("1_save")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1969225548]
+position = Vector2(0, -1.5)
+scale = Vector2(0.07, 0.066)
+texture = ExtResource("2_dino")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=940386912]
+position = Vector2(0.16666603, -10.833334)
+shape = SubResource("RectangleShape2D_dino")
+
+[node name="BotonE" type="Sprite2D" parent="." unique_id=1240748601]
+position = Vector2(1.6666665, -57)
+scale = Vector2(0.02, 0.02)
+texture = ExtResource("3_boton")
+
+[node name="LabelE" type="Label" parent="." unique_id=1406449662]
+offset_left = -6.9999995
+offset_top = -67.333336
+offset_right = 859.6666
+offset_bottom = 896.6667
+scale = Vector2(0.02, 0.02)
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("4_fuente")
+theme_override_font_sizes/font_size = 650
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Pregunta" type="Label" parent="." unique_id=1505429897]
+texture_filter = 1
+offset_left = -94.0
+offset_top = -98.66667
+offset_right = 99.0
+offset_bottom = -64.66667
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("4_fuente")
+theme_override_font_sizes/font_size = 22
+text = "¿GUARDAR PARTIDA?"
+horizontal_alignment = 1
+
+[node name="Mensaje" type="Label" parent="." unique_id=1633019397]
+visible = false
+offset_left = -110.0
+offset_top = -128.0
+offset_right = 110.0
+offset_bottom = -100.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("4_fuente")
+theme_override_font_sizes/font_size = 22
+text = "Partida guardada"
+horizontal_alignment = 1

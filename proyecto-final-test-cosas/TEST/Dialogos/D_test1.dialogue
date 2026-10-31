@@ -1,0 +1,11 @@
+~ this_is_a_node_title
+Nathan: ???.
+Nathan: [wave]Quien [[carajos|demonios|repampanos]] sosss????.
+- Que onda soy Ulisex
+	Nathan: Que onda Ulisexxx.
+- Adeush
+	Nathan: Le pintaba esa, no? Adeush. => END
+- Vovler a empezar => this_is_a_node_title
+- Terminar conversacion => END
+Nathan: Que necesitas?.
+=> END

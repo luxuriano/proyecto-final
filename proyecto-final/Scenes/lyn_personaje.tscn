@@ -47,6 +47,8 @@ var ataque_cooldown_timer = 0.0
 
 var facing_direction = 1
 
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+
 @export var vida = 5
 const VIDA_MAXIMA = 5
 
@@ -61,7 +63,19 @@ func _ready() -> void:
 
 	posicion_inicial = global_position
 
-	if GameState.volviendo_desde_zona_virus:
+	if GameState.cargando_partida:
+
+		vida = GameState.vida
+		puntos = GameState.puntos
+
+		if GameState.checkpoint_valido():
+			posicion_checkpoint = GameState.posicion_checkpoint
+			tiene_checkpoint = true
+			global_position = posicion_checkpoint
+		else:
+			posicion_checkpoint = posicion_inicial
+
+	elif GameState.volviendo_desde_zona_virus:
 
 		vida = GameState.vida
 		puntos = GameState.puntos
@@ -75,7 +89,7 @@ func _ready() -> void:
 			if collision_shape != null:
 				global_position = collision_shape.global_position
 
-		if GameState.tiene_checkpoint:
+		if GameState.checkpoint_valido():
 			posicion_checkpoint = GameState.posicion_checkpoint
 			tiene_checkpoint = true
 		else:
@@ -89,8 +103,9 @@ func _ready() -> void:
 			puntos = GameState.puntos
 
 	GameState.volviendo_desde_zona_virus = false
+	GameState.cargando_partida = false
 
-	$AnimatedSprite2D.play(\"Quieta\")
+	sprite.play(\"Quieta\")
 
 	$PegarDer.monitoring = false
 	$PegarDer.monitorable = false
@@ -116,7 +131,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		tiempo_dano -= delta
 
-		$AnimatedSprite2D.play(\"Daño\")
+		sprite.play(\"Daño\")
 
 		move_and_slide()
 
@@ -130,12 +145,12 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		tiempo_ataque -= delta
 
-		$AnimatedSprite2D.play(\"Pegar\")
+		sprite.play(\"Pegar\")
 
 		if facing_direction == 1:
-			$AnimatedSprite2D.flip_h = false
+			sprite.flip_h = false
 		else:
-			$AnimatedSprite2D.flip_h = true
+			sprite.flip_h = true
 
 		if tiempo_ataque <= 0:
 			esta_atacando = false
@@ -169,7 +184,7 @@ func _physics_process(delta: float) -> void:
 			$PegarIzq.monitoring = false
 			$PegarIzq.monitorable = false
 
-			$AnimatedSprite2D.flip_h = false
+			sprite.flip_h = false
 		else:
 			$PegarIzq.monitoring = true
 			$PegarIzq.monitorable = true
@@ -177,9 +192,9 @@ func _physics_process(delta: float) -> void:
 			$PegarDer.monitoring = false
 			$PegarDer.monitorable = false
 
-			$AnimatedSprite2D.flip_h = true
+			sprite.flip_h = true
 
-		$AnimatedSprite2D.play(\"Pegar\")
+		sprite.play(\"Pegar\")
 
 		move_and_slide()
 		return
@@ -193,12 +208,12 @@ func _physics_process(delta: float) -> void:
 		velocity.x = facing_direction * DASH_SPEED
 		velocity.y = 0
 
-		$AnimatedSprite2D.play(\"Dash\")
+		sprite.play(\"Dash\")
 
 		if facing_direction == 1:
-			$AnimatedSprite2D.flip_h = false
+			sprite.flip_h = false
 		else:
-			$AnimatedSprite2D.flip_h = true
+			sprite.flip_h = true
 
 		dash_timer -= delta
 
@@ -227,9 +242,9 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	if facing_direction == 1:
-		$AnimatedSprite2D.flip_h = false
+		sprite.flip_h = false
 	else:
-		$AnimatedSprite2D.flip_h = true
+		sprite.flip_h = true
 
 	actualizar_animacion()
 
@@ -240,16 +255,16 @@ func actualizar_animacion() -> void:
 
 	if not is_on_floor():
 		if velocity.y < 0:
-			$AnimatedSprite2D.play(\"Salto\")
+			sprite.play(\"Salto\")
 		else:
-			$AnimatedSprite2D.play(\"Caida\")
+			sprite.play(\"Caida\")
 	else:
 		var direction := Input.get_axis(\"ui_left\", \"ui_right\")
 
 		if direction != 0:
-			$AnimatedSprite2D.play(\"Moverse\")
+			sprite.play(\"Moverse\")
 		else:
-			$AnimatedSprite2D.play(\"Quieta\")
+			sprite.play(\"Quieta\")
 
 
 func activar_checkpoint(nueva_posicion: Vector2) -> void:
@@ -259,6 +274,7 @@ func activar_checkpoint(nueva_posicion: Vector2) -> void:
 
 	GameState.posicion_checkpoint = nueva_posicion
 	GameState.tiene_checkpoint = true
+	GameState.escena_checkpoint = get_tree().current_scene.scene_file_path
 
 
 func curar(cantidad: int) -> void:
@@ -299,11 +315,11 @@ func recibir_dano(cantidad: int, viene_de_derecha: bool = false) -> void:
 	tiempo_dano = TIEMPO_DANO
 
 	if viene_de_derecha:
-		$AnimatedSprite2D.flip_h = true
+		sprite.flip_h = true
 	else:
-		$AnimatedSprite2D.flip_h = false
+		sprite.flip_h = false
 
-	$AnimatedSprite2D.play(\"Daño\")
+	sprite.play(\"Daño\")
 
 
 func morir() -> void:
@@ -337,11 +353,11 @@ func morir() -> void:
 	GameState.puntos = puntos
 
 	if facing_direction == 1:
-		$AnimatedSprite2D.flip_h = false
+		sprite.flip_h = false
 	else:
-		$AnimatedSprite2D.flip_h = true
+		sprite.flip_h = true
 
-	$AnimatedSprite2D.play(\"Derrota\")
+	sprite.play(\"Derrota\")
 
 	await get_tree().create_timer(TIEMPO_DERROTA).timeout
 
@@ -367,14 +383,14 @@ func morir() -> void:
 
 	facing_direction = 1
 
-	$AnimatedSprite2D.flip_h = false
+	sprite.flip_h = false
 
 	$DetectorVirus.monitoring = true
 	$DetectorVirus.monitorable = true
 
 	esta_derrotado = false
 
-	$AnimatedSprite2D.play(\"Quieta\")
+	sprite.play(\"Quieta\")
 "
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_kqg6p"]

@@ -23,6 +23,8 @@ config/icon="res://icon.svg"
 
 DialogueManager="*uid://cr33mss3ywc87"
 GameState="*uid://3otrk2c3s2fh"
+SaveManager="*uid://l3r0juouw44h"
+PauseMenu="*uid://bfwbqho08qwaq"
 
 [display]
 
@@ -32,6 +34,10 @@ window/stretch/mode="canvas_items"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg")
+
+[global_group]
+
+Player=""
 
 [input]
 

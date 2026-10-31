@@ -7834,11 +7834,13 @@ script/source = "extends CanvasLayer
 var sprites_vida = [
 	preload(\"res://Sprites interfaz/Sin vidas.png\"),
 	preload(\"res://Sprites interfaz/Una vida.png\"),
-	preload(\"res://Sprites interfaz/Dos Vidas.png\"),
+	preload(\"res://Sprites interfaz/Dos vidas.png\"),
 	preload(\"res://Sprites interfaz/Tres vidas.png\"),
 	preload(\"res://Sprites interfaz/Cuatro vidas.png\"),
 	preload(\"res://Sprites interfaz/Cinco vidas.png\")
 ]
+
+var vida_mostrada = -1
 
 
 func _ready() -> void:
@@ -7852,6 +7854,12 @@ func _process(_delta: float) -> void:
 func actualizar_vida() -> void:
 	var vida_actual = clamp(lyn.vida, 0, 5)
 
+	# Solo se cambia la imagen cuando la vida cambia
+	if vida_actual == vida_mostrada:
+		return
+
+	vida_mostrada = vida_actual
+
 	contador_vida.texture = sprites_vida[vida_actual]
 "
 
@@ -7861,6 +7869,8 @@ script/source = "extends CanvasLayer
 
 @onready var lyn = get_parent().get_node(\"Lyn Personaje\")
 @onready var contador_puntos = $Label
+
+var puntos_mostrados = -1
 
 
 func _ready() -> void:
@@ -7874,6 +7884,12 @@ func _process(_delta: float) -> void:
 
 
 func actualizar_puntos() -> void:
+
+	# Solo se reescribe el texto cuando los puntos cambian
+	if lyn.puntos == puntos_mostrados:
+		return
+
+	puntos_mostrados = lyn.puntos
 
 	contador_puntos.text = str(lyn.puntos)
 "

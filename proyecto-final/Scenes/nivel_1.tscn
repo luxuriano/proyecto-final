@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://ciy0ymi2eqx3x" path="res://Scenes/Virus.tscn" id="8_3digf"]
 [ext_resource type="Texture2D" uid="uid://bu16j44co1ok4" path="res://Sprites estatuas/Portalrojo3.png" id="8_t31ra"]
 [ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/lyn_personaje.tscn" id="9_m5wsa"]
+[ext_resource type="PackedScene" uid="uid://xwl64fksjla2" path="res://Scenes/estatua_guardado.tscn" id="10_3xy45"]
 [ext_resource type="PackedScene" uid="uid://dbl7xea4crc6j" path="res://Scenes/moneda.tscn" id="10_gh6o0"]
 [ext_resource type="Texture2D" uid="uid://duukdr0rvgsme" path="res://Sprites interfaz/Cinco vidas.png" id="10_guoqe"]
 [ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="11_5iadn"]
@@ -11667,11 +11668,13 @@ script/source = "extends CanvasLayer
 var sprites_vida = [
 	preload(\"res://Sprites interfaz/Sin vidas.png\"),
 	preload(\"res://Sprites interfaz/Una vida.png\"),
-	preload(\"res://Sprites interfaz/Dos Vidas.png\"),
+	preload(\"res://Sprites interfaz/Dos vidas.png\"),
 	preload(\"res://Sprites interfaz/Tres vidas.png\"),
 	preload(\"res://Sprites interfaz/Cuatro vidas.png\"),
 	preload(\"res://Sprites interfaz/Cinco vidas.png\")
 ]
+
+var vida_mostrada = -1
 
 
 func _ready() -> void:
@@ -11685,6 +11688,12 @@ func _process(_delta: float) -> void:
 func actualizar_vida() -> void:
 	var vida_actual = clamp(lyn.vida, 0, 5)
 
+	# Solo se cambia la imagen cuando la vida cambia
+	if vida_actual == vida_mostrada:
+		return
+
+	vida_mostrada = vida_actual
+
 	contador_vida.texture = sprites_vida[vida_actual]
 "
 
@@ -11694,6 +11703,8 @@ script/source = "extends CanvasLayer
 
 @onready var lyn = get_parent().get_node(\"Lyn Personaje\")
 @onready var contador_puntos = $Label
+
+var puntos_mostrados = -1
 
 
 func _ready() -> void:
@@ -11707,6 +11718,12 @@ func _process(_delta: float) -> void:
 
 
 func actualizar_puntos() -> void:
+
+	# Solo se reescribe el texto cuando los puntos cambian
+	if lyn.puntos == puntos_mostrados:
+		return
+
+	puntos_mostrados = lyn.puntos
 
 	contador_puntos.text = str(lyn.puntos)
 "
@@ -11806,6 +11823,9 @@ position = Vector2(5092, -3938)
 
 [node name="Checkpoint2" parent="." unique_id=63104306 instance=ExtResource("3_p3mfg")]
 position = Vector2(8218, -531)
+
+[node name="EstatuaGuardado" parent="." unique_id=516360765 instance=ExtResource("10_3xy45")]
+position = Vector2(3796.0002, -2491)
 
 [node name="Portal1" parent="." unique_id=536535781 instance=ExtResource("4_gh6o0")]
 position = Vector2(8739, -1226)

@@ -5,51 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dk583id10iicd" path="res://Sprites Menu/Logo.png" id="3_wwsa2"]
 [ext_resource type="Texture2D" uid="uid://bp2mc4qvqttbg" path="res://Sprites interfaz/Sprites botones/Boton rectangular.png" id="4_158mb"]
 [ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_wwsa2"]
-
-[sub_resource type="GDScript" id="GDScript_jsrd8"]
-script/source = "extends Node2D
-
-@onready var nueva_partida = $NuevaPartida
-@onready var continuar_partida = $ContinuarPartida
-@onready var salir = $Salir
-@onready var ventana_nueva_partida = $VentanaNuevaPartida
-@onready var confirmar = $VentanaNuevaPartida/Confirmar
-@onready var cancelar = $VentanaNuevaPartida/Cancelar
-
-func _ready() -> void:
-	ventana_nueva_partida.visible = false
-
-	nueva_partida.pressed.connect(_on_nueva_partida_pressed)
-	continuar_partida.pressed.connect(_on_continuar_partida_pressed)
-	salir.pressed.connect(_on_salir_pressed)
-	confirmar.pressed.connect(_on_confirmar_pressed)
-	cancelar.pressed.connect(_on_cancelar_pressed)
-
-func _on_nueva_partida_pressed() -> void:
-	ventana_nueva_partida.visible = true
-
-func _on_continuar_partida_pressed() -> void:
-	get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
-
-func _on_salir_pressed() -> void:
-	get_tree().quit()
-
-func _on_confirmar_pressed() -> void:
-	GameState.vida = 5
-	GameState.puntos = 0
-	GameState.tiene_checkpoint = false
-	GameState.posicion_checkpoint = Vector2.ZERO
-	GameState.esta_en_zona_virus = false
-	GameState.volviendo_desde_zona_virus = false
-	GameState.items_recogidos.clear()
-	GameState.virus_derrotados.clear()
-	GameState.zona_virus_completada = false
-
-	get_tree().change_scene_to_file(\"res://Scenes/nivel_1.tscn\")
-
-func _on_cancelar_pressed() -> void:
-	ventana_nueva_partida.visible = false
-"
+[ext_resource type="Script" uid="uid://cldlkue8g2nv1" path="res://Scenes/menu.gd" id="6_menu"]
 
 [sub_resource type="GDScript" id="GDScript_wwsa2"]
 script/source = "extends TextureButton
@@ -114,7 +70,7 @@ func _on_button_up() -> void:
 "
 
 [node name="Menu" type="Node2D" unique_id=787354257]
-script = SubResource("GDScript_jsrd8")
+script = ExtResource("6_menu")
 
 [node name="Fondo Cielo" type="Sprite2D" parent="." unique_id=1268639329]
 z_index = -10
