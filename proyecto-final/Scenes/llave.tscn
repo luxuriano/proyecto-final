@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://di6unq0ytyqqv"]
+
+[ext_resource type="Texture2D" uid="uid://b8onebfkfxdng" path="res://Sprites ítems/Llave.png" id="1_q4r7r"]
+
+[sub_resource type="GDScript" id="GDScript_q4r7r"]
+script/source = "
+extends Area2D
+
+var recogida = false
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if recogida:
+		return
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	recogida = true
+
+	# Guardar la llave en Lyn.
+	body.tiene_llave = true
+
+	# Hacer desaparecer la llave.
+	queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_okl7c"]
+radius = 41.14608
+
+[node name="Llave" type="Area2D" unique_id=1642222019]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_q4r7r")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1397894467]
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("1_q4r7r")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1794922047]
+shape = SubResource("CircleShape2D_okl7c")

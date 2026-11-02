@@ -1,0 +1,197 @@
+[gd_scene format=3 uid="uid://6ra04k1sfcar"]
+
+[ext_resource type="Texture2D" uid="uid://dnsbjdtxr6jtu" path="res://Sprites ítems/Puerta 2.png" id="1_tswu4"]
+[ext_resource type="Texture2D" uid="uid://cscr4pcub44uw" path="res://Sprites ítems/Puerta1.png" id="2_0nvjv"]
+[ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="3_0nvjv"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="4_yocse"]
+[ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="5_7qjlv"]
+
+[sub_resource type="GDScript" id="GDScript_tswu4"]
+script/source = "
+extends Area2D
+
+var lyn_actual = null
+var puerta_abierta = false
+
+@onready var bloqueo: CollisionShape2D = $StaticBody2D/CollisionShape2D
+@onready var detector: Area2D = $Detector
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+
+@onready var fondo: Sprite2D = $fondo
+@onready var label: Label = $Label
+@onready var boton_e: Sprite2D = $BotonE
+@onready var label2: Label = $Label2
+
+
+func _ready() -> void:
+
+	# La puerta comienza cerrada.
+	animated_sprite.play(\"cerrado\")
+
+	# Ocultar todos los mensajes al comenzar.
+	fondo.hide()
+	label.hide()
+	boton_e.hide()
+	label2.hide()
+
+	# Detectar la entrada y salida de Lyn.
+	detector.body_entered.connect(_on_body_entered)
+	detector.body_exited.connect(_on_body_exited)
+
+
+func _process(_delta: float) -> void:
+
+	if lyn_actual == null or puerta_abierta:
+		return
+
+	# Si Lyn tiene la llave, puede abrir la puerta.
+	if lyn_actual.tiene_llave:
+
+		fondo.hide()
+		label.hide()
+
+		boton_e.show()
+		label2.show()
+
+		if Input.is_action_just_pressed(\"ui_e\"):
+			abrir_puerta()
+
+	else:
+
+		# Si no tiene la llave, mostrar el aviso.
+		fondo.show()
+		label.show()
+
+		boton_e.hide()
+		label2.hide()
+
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	if puerta_abierta:
+		return
+
+	lyn_actual = body
+
+
+func _on_body_exited(body: Node2D) -> void:
+
+	if body == lyn_actual:
+
+		lyn_actual = null
+
+		fondo.hide()
+		label.hide()
+		boton_e.hide()
+		label2.hide()
+
+
+func abrir_puerta() -> void:
+
+	if lyn_actual == null:
+		return
+
+	if not lyn_actual.tiene_llave:
+		return
+
+	puerta_abierta = true
+
+	# Desactivar el bloqueo físico.
+	bloqueo.set_deferred(\"disabled\", true)
+
+	# Ocultar los mensajes.
+	fondo.hide()
+	label.hide()
+	boton_e.hide()
+	label2.hide()
+
+	# Reproducir la animación de apertura.
+	animated_sprite.play(\"abierto\")
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tswu4"]
+size = Vector2(47, 212)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0nvjv"]
+size = Vector2(239, 213)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8lxdd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_tswu4")
+}],
+"loop": true,
+"name": &"abierto",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_0nvjv")
+}],
+"loop": false,
+"name": &"cerrado",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1i6uv"]
+
+[node name="Puerta" type="Area2D" unique_id=1041563564]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_tswu4")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1198105377]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=691870583]
+position = Vector2(60.5, 0)
+shape = SubResource("RectangleShape2D_tswu4")
+
+[node name="Detector" type="Area2D" parent="." unique_id=1036343427]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detector" unique_id=461185870]
+position = Vector2(61.5, -0.5)
+shape = SubResource("RectangleShape2D_0nvjv")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=994344963]
+scale = Vector2(0.27, 0.27)
+sprite_frames = SubResource("SpriteFrames_8lxdd")
+animation = &"cerrado"
+
+[node name="fondo" type="Sprite2D" parent="." unique_id=1692176775]
+position = Vector2(-178.5, -123)
+scale = Vector2(0.21055557, 0.06987498)
+texture = ExtResource("3_0nvjv")
+
+[node name="Label" type="Label" parent="." unique_id=203684149]
+offset_left = -313.0
+offset_top = -145.0
+offset_right = -46.0
+offset_bottom = -100.0
+theme_override_fonts/font = ExtResource("4_yocse")
+theme_override_font_sizes/font_size = 30
+text = "NECESITAS UNA LLAVE"
+
+[node name="BotonE" type="Sprite2D" parent="." unique_id=1292812836]
+position = Vector2(-11.999999, -108.99999)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("5_7qjlv")
+
+[node name="Label2" type="Label" parent="." unique_id=25982373]
+offset_left = -19.0
+offset_top = -133.0
+offset_right = 21.0
+offset_bottom = -88.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("4_yocse")
+theme_override_font_sizes/font_size = 30
+text = "E"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1408701596]
+position = Vector2(61, 0)
+shape = SubResource("CircleShape2D_1i6uv")
