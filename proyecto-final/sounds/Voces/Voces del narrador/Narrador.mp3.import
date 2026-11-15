@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b61mpivll031k"
+path="res://.godot/imported/Narrador.mp3-8c99d640503ba1bfe3993531ce445e9d.mp3str"
+
+[deps]
+
+source_file="res://sounds/Voces/Voces del narrador/Narrador.mp3"
+dest_files=["res://.godot/imported/Narrador.mp3-8c99d640503ba1bfe3993531ce445e9d.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

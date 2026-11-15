@@ -1,0 +1,406 @@
+[gd_scene format=3 uid="uid://b3apf41lhqk2d"]
+
+[ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="1_5n2xq"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="2_q5vxa"]
+[ext_resource type="AudioStream" uid="uid://7rhdatwj7rs1" path="res://sounds/Voces/Voces de Lyn/VozLyn7.mp3" id="3_konur"]
+[ext_resource type="AudioStream" uid="uid://8ndwywd03vpf" path="res://sounds/Voces/Voces del narrador/Narrador7.mp3" id="4_ajo45"]
+[ext_resource type="AudioStream" uid="uid://ca3baht1thd4g" path="res://sounds/Voces/Voces del narrador/Narrador8.mp3" id="5_5n2xq"]
+[ext_resource type="Texture2D" uid="uid://cnnx80f588y3p" path="res://Lyn Assets/EmojiLyn1.png" id="8_emktx"]
+[ext_resource type="Texture2D" uid="uid://dptnqngibb58r" path="res://Lyn Assets/EmojiLyn2.png" id="9_s7kxx"]
+[ext_resource type="Texture2D" uid="uid://b13wvcebe74ms" path="res://Lyn Assets/EmojiLyn3.png" id="10_5pen8"]
+[ext_resource type="Texture2D" uid="uid://cb0pas8l5oxdd" path="res://Lyn Assets/Proton1.png" id="11_7somq"]
+[ext_resource type="Texture2D" uid="uid://bp2mc4qvqttbg" path="res://Sprites interfaz/Sprites botones/Boton rectangular.png" id="11_ajo45"]
+[ext_resource type="Texture2D" uid="uid://c2lvycb7sr1ax" path="res://Lyn Assets/Proton2.png" id="12_3gu71"]
+[ext_resource type="AudioStream" uid="uid://doj6o1jypuupd" path="res://sounds/Boton.mp3" id="12_5n2xq"]
+
+[sub_resource type="GDScript" id="GDScript_o8cer"]
+script/source = "extends Node2D
+
+var lyn_actual: CharacterBody2D = null
+
+var dialogo_activo = false
+var indice_dialogo = 0
+var dialogo_terminado = false
+
+@onready var area: Area2D = $Area2D
+@onready var fondo: Sprite2D = $CanvasLayer/Fondo
+
+# Sprites de Protonus
+@onready var proton1: Sprite2D = $CanvasLayer/Protonus/Proton1
+@onready var proton2: Sprite2D = $CanvasLayer/Protonus/Proton2
+
+@onready var textos: Array[Label] = [
+	$CanvasLayer/Texto1,
+	$CanvasLayer/Texto2,
+	$CanvasLayer/Texto3
+]
+
+# Nombres que aparecen junto a cada texto.
+@onready var nombres: Array[Label] = [
+	$CanvasLayer/Nombre1,
+	$CanvasLayer/Nombre2,
+	$CanvasLayer/Nombre2
+]
+
+@onready var audios: Array[AudioStreamPlayer] = [
+	$CanvasLayer/Audio1,
+	$CanvasLayer/Audio2,
+	$CanvasLayer/Audio3
+]
+
+# Sonido al avanzar el diálogo
+@onready var sonido_saltear: AudioStreamPlayer = $CanvasLayer/Saltear
+
+# Elementos para indicar que se puede avanzar
+@onready var avanza: Sprite2D = $CanvasLayer/Avanza/Sprite2D
+@onready var label_avanza: Label = $CanvasLayer/Avanza/Label
+@onready var label_avanza2: Label = $CanvasLayer/Avanza/Label2
+
+@onready var reacciones: Array[Sprite2D] = [
+	$CanvasLayer/ReaccionesLyn/Reaccion1,
+	$CanvasLayer/ReaccionesLyn/Reaccion2,
+	$CanvasLayer/ReaccionesLyn/Reaccion3
+]
+
+# 0 = Reaccion1
+# 1 = Reaccion2
+# 2 = Reaccion3
+var reacciones_por_texto: Array[int] = [
+	1, # Texto1
+	2, # Texto2
+	2, # Texto3
+]
+
+# 0 = Proton1
+# 1 = Proton2
+var proton_por_texto: Array[int] = [
+	0, # Texto1 -> Proton1
+	1, # Texto2 -> Proton2
+	1, # Texto3 -> Proton2
+]
+
+
+func _ready() -> void:
+
+	fondo.hide()
+
+	for texto in textos:
+		texto.hide()
+
+	# Ocultar los nombres al iniciar.
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	proton1.hide()
+	proton2.hide()
+
+	# Ocultar los elementos para avanzar.
+	avanza.hide()
+	label_avanza.hide()
+	label_avanza2.hide()
+
+	area.body_entered.connect(_on_body_entered)
+
+
+# Devuelve los dos nodos de nombre sin repetirlos.
+func get_nombres_unicos() -> Array[Label]:
+	return [
+		$CanvasLayer/Nombre1,
+		$CanvasLayer/Nombre2
+	]
+
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if dialogo_terminado or dialogo_activo:
+		return
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	iniciar_dialogo(body)
+
+
+func iniciar_dialogo(lyn: CharacterBody2D) -> void:
+
+	lyn_actual = lyn
+
+	dialogo_activo = true
+	indice_dialogo = 0
+
+	lyn_actual.bloqueada_por_dialogo = true
+
+	detener_todos_los_audios()
+
+	fondo.show()
+
+	mostrar_dialogo()
+
+
+func mostrar_dialogo() -> void:
+
+	if indice_dialogo >= textos.size():
+		finalizar_dialogo()
+		return
+
+	# Ocultar todos los textos.
+	for texto in textos:
+		texto.hide()
+
+	# Ocultar todos los nombres.
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	# Ocultar todas las reacciones.
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	# Ocultar los sprites de Protonus.
+	proton1.hide()
+	proton2.hide()
+
+	detener_todos_los_audios()
+
+	# Mostrar el texto correspondiente.
+	textos[indice_dialogo].show()
+
+	# Mostrar el nombre correspondiente.
+	nombres[indice_dialogo].show()
+
+	# Mostrar la reacción correspondiente.
+	var indice_reaccion = reacciones_por_texto[indice_dialogo]
+	reacciones[indice_reaccion].show()
+
+	# Mostrar el sprite correspondiente de Protonus.
+	var indice_proton = proton_por_texto[indice_dialogo]
+
+	if indice_proton == 0:
+		proton1.show()
+	else:
+		proton2.show()
+
+	# Mostrar el indicador para avanzar.
+	avanza.show()
+
+	if indice_dialogo == textos.size() - 1:
+		label_avanza.hide()
+		label_avanza2.show()
+	else:
+		label_avanza.show()
+		label_avanza2.hide()
+
+	# Reproducir el audio correspondiente.
+	if audios[indice_dialogo].stream != null:
+		audios[indice_dialogo].play()
+
+
+func detener_todos_los_audios() -> void:
+
+	for audio in audios:
+		audio.stop()
+
+
+func _input(event: InputEvent) -> void:
+
+	if not dialogo_activo:
+		return
+
+	if event.is_action_pressed(\"ui_e\") and not event.is_echo():
+
+		# Reproducir el sonido cada vez que se pulsa E.
+		if sonido_saltear.stream != null:
+			sonido_saltear.play()
+
+		avanzar_dialogo()
+
+		get_viewport().set_input_as_handled()
+
+
+func avanzar_dialogo() -> void:
+
+	indice_dialogo += 1
+
+	if indice_dialogo >= textos.size():
+		finalizar_dialogo()
+		return
+
+	mostrar_dialogo()
+
+
+func finalizar_dialogo() -> void:
+
+	dialogo_activo = false
+	dialogo_terminado = true
+
+	detener_todos_los_audios()
+
+	fondo.hide()
+
+	for texto in textos:
+		texto.hide()
+
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	proton1.hide()
+	proton2.hide()
+
+	# Ocultar el indicador para avanzar.
+	avanza.hide()
+	label_avanza.hide()
+	label_avanza2.hide()
+
+	if lyn_actual != null:
+		lyn_actual.bloqueada_por_dialogo = false
+
+	area.set_deferred(\"monitoring\", false)
+	area.set_deferred(\"monitorable\", false)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7ucbv"]
+size = Vector2(115, 641)
+
+[node name="dialogos3" type="Node2D" unique_id=207188097]
+script = SubResource("GDScript_o8cer")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1716037690]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1729997879]
+position = Vector2(-47.5, -115.5)
+shape = SubResource("RectangleShape2D_7ucbv")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=568001096]
+
+[node name="Fondo" type="Sprite2D" parent="CanvasLayer" unique_id=2110859240]
+position = Vector2(592.5, 535.625)
+scale = Vector2(0.4883333, 0.19674997)
+texture = ExtResource("1_5n2xq")
+
+[node name="Nombre1" type="Label" parent="CanvasLayer" unique_id=1673667479]
+offset_left = 234.0
+offset_top = 440.0
+offset_right = 420.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(7.0655944e-05, 0.53247607, 0.9509247, 1)
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 47
+text = "Lyn"
+
+[node name="Nombre2" type="Label" parent="CanvasLayer" unique_id=189003674]
+offset_left = 627.0
+offset_top = 440.0
+offset_right = 950.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0.99999946, 0.32330474, 0.35903174, 1)
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 47
+text = "Kernel Protenius"
+
+[node name="Texto1" type="Label" parent="CanvasLayer" unique_id=1451711640]
+offset_left = 403.0
+offset_top = 509.0
+offset_right = 1109.0
+offset_bottom = 599.0
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 60
+text = "¿ Y esto que es?"
+
+[node name="Texto2" type="Label" parent="CanvasLayer" unique_id=772291630]
+offset_left = 279.0
+offset_top = 498.0
+offset_right = 1074.0
+offset_bottom = 700.0
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 40
+text = "¡Felicidades! Haz conseguido el primer 
+componente."
+
+[node name="Texto3" type="Label" parent="CanvasLayer" unique_id=1131079360]
+offset_left = 236.0
+offset_top = 508.0
+offset_right = 1031.0
+offset_bottom = 710.0
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 19
+text = "La memoria RAM almacena de forma temporal los datos de los programas y el sistema operativo 
+que estás usando en el momento, al adquirirla consigues la habilidad de procesar rápidamente 
+la información, así que puedes realizar movimientos mucho más rápidos. En este caso, un impulso."
+
+[node name="Audio1" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1185446213]
+stream = ExtResource("3_konur")
+volume_db = 5.0
+
+[node name="Audio2" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1199130723]
+stream = ExtResource("4_ajo45")
+volume_db = 5.0
+
+[node name="Audio3" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=2054551733]
+stream = ExtResource("5_5n2xq")
+volume_db = 5.0
+
+[node name="ReaccionesLyn" type="Node" parent="CanvasLayer" unique_id=1595699012]
+
+[node name="Reaccion1" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=1903243351]
+position = Vector2(116, 462)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("8_emktx")
+
+[node name="Reaccion2" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=1972507732]
+position = Vector2(116, 462)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("9_s7kxx")
+
+[node name="Reaccion3" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=1285551620]
+position = Vector2(116, 462)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("10_5pen8")
+
+[node name="Protonus" type="Node" parent="CanvasLayer" unique_id=650455799]
+
+[node name="Proton1" type="Sprite2D" parent="CanvasLayer/Protonus" unique_id=278357136]
+position = Vector2(1062, 491)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("11_7somq")
+
+[node name="Proton2" type="Sprite2D" parent="CanvasLayer/Protonus" unique_id=1851117210]
+position = Vector2(1062, 491)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("12_3gu71")
+
+[node name="Avanza" type="Node2D" parent="CanvasLayer" unique_id=535951141]
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Avanza" unique_id=545628735]
+position = Vector2(888, 403)
+scale = Vector2(0.1, 0.058999997)
+texture = ExtResource("11_ajo45")
+
+[node name="Label" type="Label" parent="CanvasLayer/Avanza" unique_id=298891900]
+offset_left = 811.0
+offset_top = 385.00003
+offset_right = 974.0
+offset_bottom = 440.00003
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 22
+text = "\"E\" PARA SALTEAR"
+
+[node name="Label2" type="Label" parent="CanvasLayer/Avanza" unique_id=2146473362]
+offset_left = 801.0
+offset_top = 385.00003
+offset_right = 977.0
+offset_bottom = 440.00003
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("2_q5vxa")
+theme_override_font_sizes/font_size = 22
+text = "\"E\" PARA TERNINAR"
+
+[node name="Saltear" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1873555076]
+stream = ExtResource("12_5n2xq")

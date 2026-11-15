@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://bp2mc4qvqttbg" path="res://Sprites interfaz/Sprites botones/Boton rectangular.png" id="4_158mb"]
 [ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="5_wwsa2"]
 [ext_resource type="Script" uid="uid://cldlkue8g2nv1" path="res://Scenes/menu.gd" id="6_menu"]
+[ext_resource type="AudioStream" uid="uid://r4w8qivquord" path="res://sounds/CancionMenu.mp3" id="7_wbdvm"]
+[ext_resource type="AudioStream" uid="uid://doj6o1jypuupd" path="res://sounds/Boton.mp3" id="8_6swd7"]
+[ext_resource type="Texture2D" uid="uid://bebumqe7o6o4y" path="res://Sprites interfaz/Fondo negro.png" id="8_q3rjx"]
 
 [sub_resource type="GDScript" id="GDScript_wwsa2"]
 script/source = "extends TextureButton
@@ -222,3 +225,16 @@ theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
 theme_override_fonts/font = ExtResource("5_wwsa2")
 theme_override_font_sizes/font_size = 280
 text = "CANCELAR"
+
+[node name="MusicaMenu" type="AudioStreamPlayer" parent="." unique_id=699181073]
+stream = ExtResource("7_wbdvm")
+
+[node name="SonidoBoton" type="AudioStreamPlayer" parent="." unique_id=1357177098]
+stream = ExtResource("8_6swd7")
+
+[node name="CanvasLayer3" type="CanvasLayer" parent="." unique_id=293170773]
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer3" unique_id=1421093925]
+position = Vector2(576, 324)
+scale = Vector2(0.64, 0.648)
+texture = ExtResource("8_q3rjx")

@@ -5,10 +5,12 @@
 [ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="3_0nvjv"]
 [ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="4_yocse"]
 [ext_resource type="Texture2D" uid="uid://b2lpx2dff6e6r" path="res://Sprites interfaz/Sprites botones/Boton cuadrado.png" id="5_7qjlv"]
+[ext_resource type="AudioStream" uid="uid://sbfph36hjb2d" path="res://sounds/Puerta.ogg" id="6_7qjlv"]
 
 [sub_resource type="GDScript" id="GDScript_tswu4"]
-script/source = "
-extends Area2D
+script/source = "extends Area2D
+
+@export var id_llave_necesaria: String = \"llave1\"
 
 var lyn_actual = null
 var puerta_abierta = false
@@ -21,32 +23,26 @@ var puerta_abierta = false
 @onready var label: Label = $Label
 @onready var boton_e: Sprite2D = $BotonE
 @onready var label2: Label = $Label2
+@onready var sonido_puerta: AudioStreamPlayer = $Puerta
 
 
 func _ready() -> void:
-
-	# La puerta comienza cerrada.
 	animated_sprite.play(\"cerrado\")
 
-	# Ocultar todos los mensajes al comenzar.
 	fondo.hide()
 	label.hide()
 	boton_e.hide()
 	label2.hide()
 
-	# Detectar la entrada y salida de Lyn.
 	detector.body_entered.connect(_on_body_entered)
 	detector.body_exited.connect(_on_body_exited)
 
 
 func _process(_delta: float) -> void:
-
 	if lyn_actual == null or puerta_abierta:
 		return
 
-	# Si Lyn tiene la llave, puede abrir la puerta.
-	if lyn_actual.tiene_llave:
-
+	if lyn_actual.llaves_obtenidas.has(id_llave_necesaria):
 		fondo.hide()
 		label.hide()
 
@@ -55,10 +51,7 @@ func _process(_delta: float) -> void:
 
 		if Input.is_action_just_pressed(\"ui_e\"):
 			abrir_puerta()
-
 	else:
-
-		# Si no tiene la llave, mostrar el aviso.
 		fondo.show()
 		label.show()
 
@@ -67,7 +60,6 @@ func _process(_delta: float) -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-
 	if body.name != \"Lyn Personaje\":
 		return
 
@@ -78,9 +70,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _on_body_exited(body: Node2D) -> void:
-
 	if body == lyn_actual:
-
 		lyn_actual = null
 
 		fondo.hide()
@@ -90,25 +80,22 @@ func _on_body_exited(body: Node2D) -> void:
 
 
 func abrir_puerta() -> void:
-
 	if lyn_actual == null:
 		return
 
-	if not lyn_actual.tiene_llave:
+	if not lyn_actual.llaves_obtenidas.has(id_llave_necesaria):
 		return
 
 	puerta_abierta = true
 
-	# Desactivar el bloqueo físico.
 	bloqueo.set_deferred(\"disabled\", true)
 
-	# Ocultar los mensajes.
 	fondo.hide()
 	label.hide()
 	boton_e.hide()
 	label2.hide()
 
-	# Reproducir la animación de apertura.
+	sonido_puerta.play()
 	animated_sprite.play(\"abierto\")
 "
 
@@ -195,3 +182,7 @@ text = "E"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1408701596]
 position = Vector2(61, 0)
 shape = SubResource("CircleShape2D_1i6uv")
+
+[node name="Puerta" type="AudioStreamPlayer" parent="." unique_id=1959992459]
+stream = ExtResource("6_7qjlv")
+volume_db = 3.0

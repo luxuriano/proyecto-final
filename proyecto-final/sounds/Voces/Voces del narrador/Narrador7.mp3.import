@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://8ndwywd03vpf"
+path="res://.godot/imported/Narrador7.mp3-7a695b6a50f7df6e990af265e69fa33a.mp3str"
+
+[deps]
+
+source_file="res://sounds/Voces/Voces del narrador/Narrador7.mp3"
+dest_files=["res://.godot/imported/Narrador7.mp3-7a695b6a50f7df6e990af265e69fa33a.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
