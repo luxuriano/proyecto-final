@@ -1,3 +1,4 @@
+
 extends Node
 
 var vida = 5
@@ -16,6 +17,9 @@ var virus_derrotados = []
 var monedas_recogidas = []
 
 var zona_virus_completada = false
+
+# Habilidades desbloqueadas
+var dash_desbloqueado = false
 
 
 # El checkpoint solo vale si fue activado en la escena actual
@@ -46,3 +50,6 @@ func reiniciar() -> void:
 	monedas_recogidas.clear()
 
 	zona_virus_completada = false
+
+	# Volver a bloquear el dash
+	dash_desbloqueado = false

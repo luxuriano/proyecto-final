@@ -7,12 +7,19 @@
 script/source = "
 extends Area2D
 
+const ID_MEMORIA = \"memoria_ram\"
+
 var recogida = false
 
 @onready var sonido_ram: AudioStreamPlayer = $Ram
 
 
 func _ready() -> void:
+	# Comprobar si Lyn ya recogió esta memoria
+	if GameState.items_recogidos.has(ID_MEMORIA):
+		queue_free()
+		return
+
 	body_entered.connect(_on_body_entered)
 
 
@@ -26,6 +33,13 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 
 	recogida = true
+
+	# Guardar que la memoria fue recogida
+	if not GameState.items_recogidos.has(ID_MEMORIA):
+		GameState.items_recogidos.append(ID_MEMORIA)
+
+	# Guardar el desbloqueo del dash
+	GameState.dash_desbloqueado = true
 
 	# Desactivar la detección inmediatamente
 	set_deferred(\"monitoring\", false)

@@ -99,6 +99,9 @@ func _ready() -> void:
 
 	pantalla_negra.color = Color(0, 0, 0, 0)
 
+	# Recuperar permanentemente el desbloqueo del dash
+	puede_hacer_dash = GameState.dash_desbloqueado
+
 	if GameState.cargando_partida:
 
 		vida = GameState.vida
@@ -277,7 +280,6 @@ func _physics_process(delta: float) -> void:
 		dash_timer = DASH_DURATION
 		dash_cooldown_timer = DASH_COOLDOWN
 
-		# Reproducir sonido al iniciar el dash
 		sonido_dash.play()
 
 	if is_dashing:
@@ -366,6 +368,9 @@ func actualizar_animacion() -> void:
 func desbloquear_dash() -> void:
 	puede_hacer_dash = true
 
+	# Guardar el desbloqueo en GameState
+	GameState.dash_desbloqueado = true
+
 
 # ACTIVAR O DESACTIVAR LA CÁMARA DE LYN DESDE EL DIÁLOGO
 func controlar_camara_dialogo(desactivar: bool) -> void:
@@ -403,12 +408,10 @@ func recibir_dano(cantidad: int, viene_de_derecha: bool = false) -> void:
 
 	velocity = Vector2.ZERO
 
-	# Si pierde el último corazón, morir sin reproducir el sonido Dano.
 	if vida <= 0:
 		morir()
 		return
 
-	# Reproducir Dano solamente si todavía le quedan corazones.
 	sonido_dano.play()
 
 	esta_recibiendo_dano = true

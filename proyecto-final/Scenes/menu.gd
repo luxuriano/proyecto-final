@@ -1,3 +1,4 @@
+
 extends Node2D
 
 enum Modo { NUEVA, CONTINUAR }
@@ -16,6 +17,9 @@ const COLOR_ERROR := Color(0.8, 0.1, 0.2)
 @onready var continuar_partida = $ContinuarPartida
 @onready var salir = $Salir
 
+@onready var musica_menu: AudioStreamPlayer = $MusicaMenu
+@onready var sonido_boton: AudioStreamPlayer = $SonidoBoton
+
 var modo: Modo = Modo.NUEVA
 
 var panel_slots: Control
@@ -31,7 +35,11 @@ var accion_pendiente: Callable = Callable()
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	# La ventana vieja de confirmacion ya no se usa (ahora se crea dentro del panel de slots)
+
+	# Iniciar música del menú
+	musica_menu.play()
+
+	# La ventana vieja de confirmacion ya no se usa
 	var ventana_vieja = get_node_or_null("VentanaNuevaPartida")
 
 	if ventana_vieja != null:
@@ -42,9 +50,19 @@ func _ready() -> void:
 	nueva_partida.pressed.connect(_on_nueva_partida_pressed)
 	continuar_partida.pressed.connect(_on_continuar_partida_pressed)
 	salir.pressed.connect(_on_salir_pressed)
+
+	# Sonido para los botones principales, excepto SALIR
+	nueva_partida.pressed.connect(_reproducir_sonido_boton)
+	continuar_partida.pressed.connect(_reproducir_sonido_boton)
+
 	SaveManager.error_de_carga.connect(_on_error_de_carga)
 
 	_actualizar_boton_continuar()
+
+
+# Reproducir sonido de botones
+func _reproducir_sonido_boton() -> void:
+	sonido_boton.play()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -371,6 +389,9 @@ func _crear_boton(texto: String, tamano: int, minimo: Vector2) -> Button:
 	boton.add_theme_stylebox_override("pressed", _estilo(COLOR_FONDO_PRESIONADO, COLOR_TEXTO, 3, 8))
 	boton.add_theme_stylebox_override("focus", _estilo(COLOR_FONDO_HOVER, COLOR_TEXTO, 3, 8))
 	boton.add_theme_stylebox_override("disabled", _estilo(COLOR_FONDO_OFF, COLOR_BORDE, 3, 8))
+
+	# Todos los botones creados aquí reproducen el sonido
+	boton.pressed.connect(_reproducir_sonido_boton)
 
 	return boton
 
