@@ -19,6 +19,8 @@
 script/source = "
 extends Node2D
 
+const ID_DIALOGO := \"dialogo_protonus_01\"
+
 var lyn_actual: CharacterBody2D = null
 
 var dialogo_activo = false
@@ -28,15 +30,12 @@ var dialogo_terminado = false
 @onready var area: Area2D = $Area2D
 @onready var fondo: Sprite2D = $CanvasLayer/Fondo
 
-# Indicador para avanzar
 @onready var avanza: Sprite2D = $CanvasLayer/Avanza/Sprite2D
 @onready var label_avanza: Label = $CanvasLayer/Avanza/Label
 @onready var label_avanza2: Label = $CanvasLayer/Avanza/Label2
 
-# Sonido al avanzar el diálogo
 @onready var sonido_saltar: AudioStreamPlayer = $CanvasLayer/Saltear
 
-# Sprites de Protonus
 @onready var proton1: Sprite2D = $CanvasLayer/Protonus/Proton1
 @onready var proton2: Sprite2D = $CanvasLayer/Protonus/Proton2
 
@@ -48,7 +47,6 @@ var dialogo_terminado = false
 	$CanvasLayer/Texto5
 ]
 
-# Nombres que aparecen junto a cada texto.
 @onready var nombres: Array[Label] = [
 	$CanvasLayer/Nombre1,
 	$CanvasLayer/Nombre2,
@@ -71,36 +69,34 @@ var dialogo_terminado = false
 	$CanvasLayer/ReaccionesLyn/Reaccion3
 ]
 
-# 0 = Reaccion1
-# 1 = Reaccion2
-# 2 = Reaccion3
 var reacciones_por_texto: Array[int] = [
-	0, # Texto1
-	2, # Texto2
-	0, # Texto3
-	2, # Texto4
-	0  # Texto5
+	0,
+	2,
+	0,
+	2,
+	0
 ]
 
-# 0 = Proton1
-# 1 = Proton2
 var proton_por_texto: Array[int] = [
-	0, # Texto1 -> Proton1
-	1, # Texto2 -> Proton2
-	0, # Texto3 -> Proton1
-	1, # Texto4 -> Proton2
-	0  # Texto5 -> Proton1
+	0,
+	1,
+	0,
+	1,
+	0
 ]
 
 
 func _ready() -> void:
+
+	if GameState.dialogos_vistos.has(ID_DIALOGO):
+		queue_free()
+		return
 
 	fondo.hide()
 
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar los nombres al iniciar.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
@@ -110,7 +106,6 @@ func _ready() -> void:
 	proton1.hide()
 	proton2.hide()
 
-	# Ocultar indicador al iniciar.
 	avanza.hide()
 	label_avanza.hide()
 	label_avanza2.hide()
@@ -118,8 +113,8 @@ func _ready() -> void:
 	area.body_entered.connect(_on_body_entered)
 
 
-# Devuelve los dos nodos de nombre sin repetirlos.
 func get_nombres_unicos() -> Array[Label]:
+
 	return [
 		$CanvasLayer/Nombre1,
 		$CanvasLayer/Nombre2
@@ -159,35 +154,27 @@ func mostrar_dialogo() -> void:
 		finalizar_dialogo()
 		return
 
-	# Ocultar todos los textos.
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar todos los nombres.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
-	# Ocultar todas las reacciones.
 	for reaccion in reacciones:
 		reaccion.hide()
 
-	# Ocultar los sprites de Protonus.
 	proton1.hide()
 	proton2.hide()
 
 	detener_todos_los_audios()
 
-	# Mostrar el texto correspondiente.
 	textos[indice_dialogo].show()
 
-	# Mostrar el nombre correspondiente.
 	nombres[indice_dialogo].show()
 
-	# Mostrar la reacción correspondiente.
 	var indice_reaccion = reacciones_por_texto[indice_dialogo]
 	reacciones[indice_reaccion].show()
 
-	# Mostrar el sprite correspondiente de Protonus.
 	var indice_proton = proton_por_texto[indice_dialogo]
 
 	if indice_proton == 0:
@@ -195,11 +182,8 @@ func mostrar_dialogo() -> void:
 	else:
 		proton2.show()
 
-	# Mostrar indicador Avanza.
 	avanza.show()
 
-	# Mostrar Label en todos los textos excepto el último.
-	# En el último mostrar Label2.
 	if indice_dialogo == textos.size() - 1:
 		label_avanza.hide()
 		label_avanza2.show()
@@ -207,7 +191,6 @@ func mostrar_dialogo() -> void:
 		label_avanza.show()
 		label_avanza2.hide()
 
-	# Reproducir el audio correspondiente.
 	if audios[indice_dialogo].stream != null:
 		audios[indice_dialogo].play()
 
@@ -225,7 +208,6 @@ func _input(event: InputEvent) -> void:
 
 	if event.is_action_pressed(\"ui_e\") and not event.is_echo():
 
-		# Reproducir sonido cada vez que se pulsa E.
 		sonido_saltar.play()
 
 		avanzar_dialogo()
@@ -253,7 +235,6 @@ func finalizar_dialogo() -> void:
 
 	fondo.hide()
 
-	# Ocultar indicador Avanza.
 	avanza.hide()
 	label_avanza.hide()
 	label_avanza2.hide()
@@ -272,10 +253,17 @@ func finalizar_dialogo() -> void:
 
 	if lyn_actual != null:
 		lyn_actual.bloqueada_por_dialogo = false
-	
+
+	if not GameState.dialogos_vistos.has(ID_DIALOGO):
+		GameState.dialogos_vistos.append(ID_DIALOGO)
+
+	if not SaveManager.guardar_estado_actual():
+		print(\"[Dialogo] ERROR: no se pudo guardar el diálogo visto.\")
+
 	area.set_deferred(\"monitoring\", false)
 	area.set_deferred(\"monitorable\", false)
-	
+
+	queue_free()
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iw6dv"]

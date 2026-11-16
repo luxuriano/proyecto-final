@@ -1,10 +1,8 @@
-# PantallaCarga (Autoload con escena)
-# Muestra una imagen mientras se carga un nivel, con fundido de entrada y de salida.
+
 extends CanvasLayer
 
 signal carga_fallida(motivo: String)
 
-# Tiempo minimo que se ve la pantalla (para que no sea un parpadeo)
 const SEGUNDOS_MINIMOS := 1.5
 const DURACION_FUNDIDO := 0.35
 
@@ -27,7 +25,6 @@ func _ready() -> void:
 	_estilizar_barra()
 
 
-# Carga el nivel en segundo plano mostrando la pantalla de carga
 func cargar_nivel(ruta: String) -> void:
 	if _cargando:
 		return
@@ -64,7 +61,6 @@ func _process(delta: float) -> void:
 	if _progreso.size() > 0:
 		avance = float(_progreso[0])
 
-	# La barra no llega al final antes del tiempo minimo
 	barra.value = move_toward(barra.value, minf(avance, _tiempo / SEGUNDOS_MINIMOS), delta * 2.0)
 
 	if estado == ResourceLoader.THREAD_LOAD_FAILED or estado == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
@@ -91,7 +87,6 @@ func _terminar() -> void:
 		_fallar("crear nivel (cod %d)" % resultado)
 		return
 
-	# Se espera a que el nivel ya este armado y recien ahi se hace el fundido de salida
 	await get_tree().process_frame
 	await get_tree().process_frame
 

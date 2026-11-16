@@ -529,7 +529,6 @@ func atacar() -> void:
 
 			if lyn_actual.has_method("recibir_dano"):
 
-				# Sonido cuando el ataque impacta a Lyn
 				sonido_golpear.play()
 
 				if punto_ataque_actual == $PuntoAtaqueDer:

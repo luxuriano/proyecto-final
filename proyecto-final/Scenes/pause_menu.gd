@@ -1,7 +1,4 @@
 
-# PauseMenu.gd (Autoload)
-# Menu de pausa: Esc lo abre y lo cierra. Permite volver al juego o salir al menu principal.
-
 extends CanvasLayer
 
 const ESCENA_MENU := "res://Scenes/menu.tscn"
@@ -25,7 +22,6 @@ var abierto := false
 
 
 func _ready() -> void:
-	# Tiene que seguir funcionando mientras el juego esta en pausa
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
 
@@ -58,12 +54,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-# Reproducir sonido al pulsar un boton
 func _reproducir_sonido_boton() -> void:
 	sonido_boton.play()
 
 
-# No se pausa en el menu principal (ahi Esc cierra la pantalla de slots)
 func _se_puede_pausar() -> bool:
 	var escena := get_tree().current_scene
 
@@ -113,8 +107,6 @@ func _salir_al_menu() -> void:
 	_reanudar()
 	get_tree().change_scene_to_file(ESCENA_MENU)
 
-
-# ======================= CONSTRUCCION DE LA INTERFAZ =======================
 
 func _crear_interfaz() -> void:
 	raiz = Control.new()
@@ -212,7 +204,6 @@ func _crear_boton(texto: String, tamano: int, minimo: Vector2) -> Button:
 	boton.add_theme_stylebox_override("pressed", _estilo(COLOR_FONDO_PRESIONADO, COLOR_TEXTO, 3, 8))
 	boton.add_theme_stylebox_override("focus", _estilo(COLOR_FONDO_HOVER, COLOR_TEXTO, 3, 8))
 
-	# Conectar sonido a todos los botones creados
 	boton.pressed.connect(_reproducir_sonido_boton)
 
 	return boton

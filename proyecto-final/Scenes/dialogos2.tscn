@@ -16,7 +16,10 @@
 [ext_resource type="AudioStream" uid="uid://doj6o1jypuupd" path="res://sounds/Boton.mp3" id="14_cm4gc"]
 
 [sub_resource type="GDScript" id="GDScript_3kbh4"]
-script/source = "extends Node2D
+script/source = "
+extends Node2D
+
+const ID_DIALOGO = \"dialogo2\"
 
 var lyn_actual: CharacterBody2D = null
 
@@ -27,14 +30,11 @@ var dialogo_terminado = false
 @onready var area: Area2D = $Area2D
 @onready var fondo: Sprite2D = $CanvasLayer/Fondo
 
-# Cámara de la escena Nivel1
 @onready var camara_virus: Camera2D = get_tree().current_scene.get_node(\"CameraVirus\")
 
-# Sprites de Protonus
 @onready var proton1: Sprite2D = $CanvasLayer/Protonus/Proton1
 @onready var proton2: Sprite2D = $CanvasLayer/Protonus/Proton2
 
-# Textos del diálogo
 @onready var textos: Array[Label] = [
 	$CanvasLayer/Texto1,
 	$CanvasLayer/Texto2,
@@ -43,7 +43,6 @@ var dialogo_terminado = false
 	$CanvasLayer/Texto5
 ]
 
-# Audios del diálogo
 @onready var audios: Array[AudioStreamPlayer] = [
 	$CanvasLayer/Audio1,
 	$CanvasLayer/Audio2,
@@ -52,82 +51,85 @@ var dialogo_terminado = false
 	$CanvasLayer/Audio5
 ]
 
-# Sonido al avanzar el diálogo
 @onready var sonido_saltear: AudioStreamPlayer = $CanvasLayer/Saltear
 
-# Elementos para indicar que se puede avanzar
 @onready var avanza: Sprite2D = $CanvasLayer/Avanza/Sprite2D
 @onready var label_avanza: Label = $CanvasLayer/Avanza/Label
 @onready var label_avanza2: Label = $CanvasLayer/Avanza/Label2
 
-# Nombre que corresponde a cada texto
 @onready var nombres: Array[Label] = [
-	$CanvasLayer/Nombre1, # Texto1
-	$CanvasLayer/Nombre2, # Texto2
-	$CanvasLayer/Nombre2, # Texto3
-	$CanvasLayer/Nombre1, # Texto4
-	$CanvasLayer/Nombre2  # Texto5
+	$CanvasLayer/Nombre1,
+	$CanvasLayer/Nombre2,
+	$CanvasLayer/Nombre2,
+	$CanvasLayer/Nombre1,
+	$CanvasLayer/Nombre2
 ]
 
-# Sprites de reacciones de Lyn
 @onready var reacciones: Array[Sprite2D] = [
 	$CanvasLayer/ReaccionesLyn/Reaccion1,
 	$CanvasLayer/ReaccionesLyn/Reaccion2,
 	$CanvasLayer/ReaccionesLyn/Reaccion3
 ]
 
-# 0 = Reaccion1
-# 1 = Reaccion2
-# 2 = Reaccion3
-# -1 = Ninguna
 var reacciones_por_texto: Array[int] = [
-	0,  # Texto1 -> Reaccion1
-	2,  # Texto2 -> Reaccion3
-	2,  # Texto3 -> Reaccion3
-	0,  # Texto4 -> Reaccion1
-	2   # Texto5 -> Reaccion3
+	0,
+	2,
+	2,
+	0,
+	2
 ]
 
-# 0 = Proton1
-# 1 = Proton2
-# -1 = Ninguno
 var proton_por_texto: Array[int] = [
-	0,  # Texto1 -> Proton1
-	1,  # Texto2 -> Proton2
-	1,  # Texto3 -> Proton2
-	0,  # Texto4 -> Proton1
-	1   # Texto5 -> Proton2
+	0,
+	1,
+	1,
+	0,
+	1
 ]
+
 
 func _ready() -> void:
 
-	fondo.hide()
+	ocultar_todo()
 
-	# La cámara de Virus comienza desactivada.
 	camara_virus.enabled = false
 
-	# Ocultar todos los textos.
+	if GameState.dialogos_vistos.has(ID_DIALOGO):
+
+		dialogo_terminado = true
+		dialogo_activo = false
+
+		area.set_deferred(\"monitoring\", false)
+		area.set_deferred(\"monitorable\", false)
+
+		return
+
+	area.body_entered.connect(_on_body_entered)
+
+
+func ocultar_todo() -> void:
+
+	fondo.hide()
+
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar los nombres.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
-	# Ocultar las reacciones.
 	for reaccion in reacciones:
 		reaccion.hide()
 
-	# Ocultar los sprites de Protonus.
 	proton1.hide()
 	proton2.hide()
 
-	# Ocultar los elementos para avanzar.
 	avanza.hide()
 	label_avanza.hide()
 	label_avanza2.hide()
 
-	area.body_entered.connect(_on_body_entered)
+	detener_todos_los_audios()
+
+	sonido_saltear.stop()
 
 
 func get_nombres_unicos() -> Array[Label]:
@@ -140,6 +142,9 @@ func get_nombres_unicos() -> Array[Label]:
 func _on_body_entered(body: Node2D) -> void:
 
 	if dialogo_terminado or dialogo_activo:
+		return
+
+	if GameState.dialogos_vistos.has(ID_DIALOGO):
 		return
 
 	if body.name != \"Lyn Personaje\":
@@ -155,10 +160,8 @@ func iniciar_dialogo(lyn: CharacterBody2D) -> void:
 	dialogo_activo = true
 	indice_dialogo = 0
 
-	# Bloquear el movimiento de Lyn.
 	lyn_actual.bloqueada_por_dialogo = true
 
-	# Mantener activa la cámara de Lyn al comenzar.
 	lyn_actual.controlar_camara_dialogo(false)
 	camara_virus.enabled = false
 
@@ -175,37 +178,29 @@ func mostrar_dialogo() -> void:
 		finalizar_dialogo()
 		return
 
-	# Ocultar todos los textos.
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar todos los nombres.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
-	# Ocultar todas las reacciones.
 	for reaccion in reacciones:
 		reaccion.hide()
 
-	# Ocultar los sprites de Protonus.
 	proton1.hide()
 	proton2.hide()
 
 	detener_todos_los_audios()
 
-	# Mostrar el texto correspondiente.
 	textos[indice_dialogo].show()
 
-	# Mostrar el nombre correspondiente.
 	nombres[indice_dialogo].show()
 
-	# Mostrar la reacción de Lyn.
 	var indice_reaccion = reacciones_por_texto[indice_dialogo]
 
 	if indice_reaccion >= 0:
 		reacciones[indice_reaccion].show()
 
-	# Mostrar el Protonus correspondiente.
 	var indice_proton = proton_por_texto[indice_dialogo]
 
 	if indice_proton == 0:
@@ -213,7 +208,6 @@ func mostrar_dialogo() -> void:
 	elif indice_proton == 1:
 		proton2.show()
 
-	# Mostrar el indicador para avanzar.
 	avanza.show()
 
 	if indice_dialogo == textos.size() - 1:
@@ -223,20 +217,16 @@ func mostrar_dialogo() -> void:
 		label_avanza.show()
 		label_avanza2.hide()
 
-	# CONTROL DE LA CÁMARA.
 	if indice_dialogo == 1:
 
-		# Segundo texto: activar CameraVirus.
 		lyn_actual.controlar_camara_dialogo(true)
 		camara_virus.enabled = true
 
 	else:
 
-		# Los demás textos: volver a la cámara de Lyn.
 		camara_virus.enabled = false
 		lyn_actual.controlar_camara_dialogo(false)
 
-	# Reproducir el audio correspondiente.
 	if audios[indice_dialogo].stream != null:
 		audios[indice_dialogo].play()
 
@@ -254,7 +244,6 @@ func _input(event: InputEvent) -> void:
 
 	if event.is_action_pressed(\"ui_e\") and not event.is_echo():
 
-		# Reproducir el sonido cada vez que se pulsa E.
 		if sonido_saltear.stream != null:
 			sonido_saltear.play()
 
@@ -281,41 +270,25 @@ func finalizar_dialogo() -> void:
 
 	detener_todos_los_audios()
 
-	fondo.hide()
+	ocultar_todo()
 
-	# Desactivar CameraVirus.
 	camara_virus.enabled = false
-
-	# Ocultar todos los textos.
-	for texto in textos:
-		texto.hide()
-
-	# Ocultar todos los nombres.
-	for nombre in get_nombres_unicos():
-		nombre.hide()
-
-	# Ocultar todas las reacciones.
-	for reaccion in reacciones:
-		reaccion.hide()
-
-	# Ocultar los sprites de Protonus.
-	proton1.hide()
-	proton2.hide()
-
-	# Ocultar el indicador para avanzar.
-	avanza.hide()
-	label_avanza.hide()
-	label_avanza2.hide()
 
 	if lyn_actual != null:
 
-		# Restaurar la cámara de Lyn.
 		lyn_actual.controlar_camara_dialogo(false)
 
-		# Desbloquear el movimiento de Lyn.
 		lyn_actual.bloqueada_por_dialogo = false
 
-	# Desactivar el área para que el diálogo no vuelva a comenzar.
+	if not GameState.dialogos_vistos.has(ID_DIALOGO):
+
+		GameState.dialogos_vistos.append(ID_DIALOGO)
+
+		var guardado = SaveManager.guardar_estado_actual()
+
+		if not guardado:
+			print(\"[Dialogo2] ERROR al guardar: \", SaveManager.ultimo_error)
+
 	area.set_deferred(\"monitoring\", false)
 	area.set_deferred(\"monitorable\", false)
 "

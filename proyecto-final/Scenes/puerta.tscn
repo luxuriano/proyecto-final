@@ -35,7 +35,6 @@ func _ready() -> void:
 	boton_e.hide()
 	label2.hide()
 
-	# Si esta puerta ya se abrio en esta partida, se muestra abierta
 	id_puerta = str(get_path())
 
 	if id_puerta in GameState.puertas_abiertas:
@@ -96,7 +95,6 @@ func abrir_puerta() -> void:
 
 	puerta_abierta = true
 
-	# Se anota para que se guarde y no se cierre al volver a cargar
 	if id_puerta not in GameState.puertas_abiertas:
 		GameState.puertas_abiertas.append(id_puerta)
 
@@ -111,7 +109,6 @@ func abrir_puerta() -> void:
 	animated_sprite.play(\"abierto\")
 
 
-# Deja la puerta abierta sin sonido ni animacion (para partidas cargadas)
 func _dejar_abierta() -> void:
 	puerta_abierta = true
 

@@ -15,7 +15,6 @@ var recogida = false
 
 
 func _ready() -> void:
-	# Comprobar si Lyn ya recogió esta memoria
 	if GameState.items_recogidos.has(ID_MEMORIA):
 		queue_free()
 		return
@@ -28,38 +27,30 @@ func _on_body_entered(body: Node2D) -> void:
 	if recogida:
 		return
 
-	# Comprobar que el cuerpo que toca la memoria sea Lyn
 	if body.name != \"Lyn Personaje\":
 		return
 
 	recogida = true
 
-	# Guardar que la memoria fue recogida
 	if not GameState.items_recogidos.has(ID_MEMORIA):
 		GameState.items_recogidos.append(ID_MEMORIA)
 
-	# Guardar el desbloqueo del dash
 	GameState.dash_desbloqueado = true
 
-	# Desactivar la detección inmediatamente
 	set_deferred(\"monitoring\", false)
 	set_deferred(\"monitorable\", false)
 
-	# Desbloquear la habilidad de dash
 	if body.has_method(\"desbloquear_dash\"):
 		body.desbloquear_dash()
 
-	# Reproducir sonido
 	sonido_ram.play()
 
-	# Hacer desaparecer la memoria inmediatamente
 	$Sprite2D.hide()
 
 	var collision = get_node_or_null(\"CollisionShape2D\")
 	if collision != null:
 		collision.set_deferred(\"disabled\", true)
 
-	# Esperar a que termine el sonido antes de eliminar la escena
 	await sonido_ram.finished
 
 	queue_free()

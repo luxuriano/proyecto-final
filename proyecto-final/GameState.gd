@@ -20,11 +20,11 @@ var puertas_abiertas = []
 
 var zona_virus_completada = false
 
-# Habilidades desbloqueadas
 var dash_desbloqueado = false
 
+var dialogos_vistos = []
 
-# El checkpoint solo vale si fue activado en la escena actual
+
 func checkpoint_valido() -> bool:
 	var escena = get_tree().current_scene
 
@@ -34,7 +34,6 @@ func checkpoint_valido() -> bool:
 	return tiene_checkpoint and escena_checkpoint == escena.scene_file_path
 
 
-# Deja todo como en una partida nueva
 func reiniciar() -> void:
 	vida = 5
 	puntos = 0
@@ -55,5 +54,6 @@ func reiniciar() -> void:
 
 	zona_virus_completada = false
 
-	# Volver a bloquear el dash
 	dash_desbloqueado = false
+
+	dialogos_vistos.clear()

@@ -41,11 +41,9 @@ const TIEMPO_COOLDOWN_ATAQUE = 0.3
 
 const TIEMPO_FUNDIDO = 0.8
 
-# Coyote Time
 const COYOTE_TIME = 0.15
 var coyote_timer = 0.0
 
-# Dash
 var puede_hacer_dash = false
 var is_dashing = false
 var dash_timer = 0.0
@@ -64,15 +62,12 @@ var facing_direction = 1
 
 var tiene_llave = false
 
-# Las llaves viven en GameState: asi se guardan en la partida y no se pierden al cambiar de escena
 var llaves_obtenidas: Array:
 	get:
 		return GameState.llaves_obtenidas
 
-# Bloqueo durante el diálogo
 var bloqueada_por_dialogo = false
 
-# Control de cámara durante el diálogo
 var camara_desactivada_por_dialogo = false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -101,7 +96,6 @@ func _ready() -> void:
 
 	pantalla_negra.color = Color(0, 0, 0, 0)
 
-	# Recuperar permanentemente el desbloqueo del dash
 	puede_hacer_dash = GameState.dash_desbloqueado
 
 	if GameState.cargando_partida:
@@ -151,7 +145,6 @@ func _ready() -> void:
 
 	sprite.play(\"Quieta\")
 
-	# Saca del nivel las llaves que ya se recogieron en esta partida
 	call_deferred(\"_quitar_llaves_recogidas\")
 
 	$PegarDer.set_deferred(\"monitoring\", false)
@@ -163,7 +156,6 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 
-	# BLOQUEO DURANTE EL DIÁLOGO
 	if bloqueada_por_dialogo:
 
 		velocity.x = 0
@@ -279,7 +271,6 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	# DASH: solamente se puede usar después de recoger la MemoriaRam
 	if puede_hacer_dash and Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
 		is_dashing = true
 		dash_timer = DASH_DURATION
@@ -306,7 +297,6 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	# COYOTE TIME
 	if is_on_floor():
 		coyote_timer = COYOTE_TIME
 	else:
@@ -369,7 +359,6 @@ func actualizar_animacion() -> void:
 			sprite.play(\"Quieta\")
 
 
-# QUITAR DEL NIVEL LAS LLAVES YA RECOGIDAS
 func _quitar_llaves_recogidas() -> void:
 	var escena = get_tree().current_scene
 
@@ -381,15 +370,12 @@ func _quitar_llaves_recogidas() -> void:
 			nodo.queue_free()
 
 
-# DESBLOQUEAR DASH AL RECOGER LA MEMORIA RAM
 func desbloquear_dash() -> void:
 	puede_hacer_dash = true
 
-	# Guardar el desbloqueo en GameState
 	GameState.dash_desbloqueado = true
 
 
-# ACTIVAR O DESACTIVAR LA CÁMARA DE LYN DESDE EL DIÁLOGO
 func controlar_camara_dialogo(desactivar: bool) -> void:
 
 	camara_desactivada_por_dialogo = desactivar
@@ -495,7 +481,6 @@ func morir() -> void:
 	sprite.play(\"Derrota\")
 	sonido_muerte.play()
 
-	# FUNDIDO PROGRESIVO A NEGRO
 	var tween_entrada = create_tween()
 	tween_entrada.tween_property(
 		pantalla_negra,

@@ -1,5 +1,4 @@
-# SaveManager.gd (Autoload)
-# Sistema de guardado con 3 slots (user://slot_1.json, slot_2.json, slot_3.json)
+
 extends Node
 
 const NUM_SLOTS := 3
@@ -7,13 +6,9 @@ const VERSION_GUARDADO := 1
 const NIVEL_INICIAL := "res://Scenes/nivel_1.tscn"
 const VIDA_MAXIMA := 5
 
-# Se avisa cuando un nivel no se pudo abrir (el menu muestra el motivo)
 signal error_de_carga(motivo: String)
 
-# Slot en el que se esta jugando (lo elige el menu principal)
 var slot_actual: int = 1
-
-# Motivo corto del ultimo fallo (la estatua y el menu lo muestran en pantalla)
 var ultimo_error: String = ""
 
 var _tiempo_acumulado: float = 0.0
@@ -25,8 +20,6 @@ func _ready() -> void:
 	_inicio_sesion_ms = Time.get_ticks_msec()
 
 
-# ======================= CONSULTAS =======================
-
 func slot_valido(slot: int) -> bool:
 	return slot >= 1 and slot <= NUM_SLOTS
 
@@ -35,7 +28,6 @@ func ruta_slot(slot: int) -> String:
 	return "user://slot_%d.json" % slot
 
 
-# Datos resumidos de un slot para mostrarlos en el menu
 func leer_resumen(slot: int) -> Dictionary:
 	var resumen := {
 		"ocupado": false,
@@ -82,9 +74,7 @@ func hay_alguna_partida_valida() -> bool:
 	return false
 
 
-# ======================= ACCIONES =======================
 
-# Empieza una partida nueva en el slot (crea el archivo enseguida)
 func nueva_partida(slot: int) -> bool:
 	ultimo_error = ""
 	_puede_reintentar = false
@@ -107,7 +97,6 @@ func nueva_partida(slot: int) -> bool:
 	return _abrir_nivel(NIVEL_INICIAL)
 
 
-# Guarda en el slot actual. "lyn" es el personaje y "posicion" donde reaparece al cargar.
 func guardar_partida(lyn, posicion: Vector2) -> bool:
 	ultimo_error = ""
 
@@ -118,7 +107,6 @@ func guardar_partida(lyn, posicion: Vector2) -> bool:
 		print("[Guardado] ERROR: ", ultimo_error)
 		return false
 
-	# Solo se guarda en los niveles (no dentro de la zona virus)
 	if GameState.esta_en_zona_virus:
 		ultimo_error = "zona virus"
 		print("[Guardado] ERROR: ", ultimo_error)
@@ -134,7 +122,10 @@ func guardar_partida(lyn, posicion: Vector2) -> bool:
 	GameState.posicion_checkpoint = posicion
 	GameState.escena_checkpoint = escena.scene_file_path
 
-	var guardado := _escribir_seguro(ruta_slot(slot_actual), _construir_datos(escena.scene_file_path))
+	var guardado := _escribir_seguro(
+		ruta_slot(slot_actual),
+		_construir_datos(escena.scene_file_path)
+	)
 
 	if guardado:
 		print("[Guardado] OK slot ", slot_actual, " en ", ProjectSettings.globalize_path(ruta_slot(slot_actual)))
@@ -143,7 +134,44 @@ func guardar_partida(lyn, posicion: Vector2) -> bool:
 	return guardado
 
 
-# Carga un slot y cambia al nivel guardado
+func guardar_estado_actual() -> bool:
+	ultimo_error = ""
+
+	if not slot_valido(slot_actual):
+		ultimo_error = "slot invalido"
+		print("[Guardado] ERROR: ", ultimo_error)
+		return false
+
+	var escena = get_tree().current_scene
+
+	if escena == null or escena.scene_file_path == "":
+		ultimo_error = "escena sin .tscn"
+		print("[Guardado] ERROR: ", ultimo_error)
+		return false
+
+	var lyn = escena.find_child("Lyn Personaje", true, false)
+
+	if lyn != null:
+		var vida_actual = lyn.get("vida")
+		var puntos_actuales = lyn.get("puntos")
+
+		if vida_actual != null:
+			GameState.vida = int(vida_actual)
+
+		if puntos_actuales != null:
+			GameState.puntos = int(puntos_actuales)
+
+	var guardado := _escribir_seguro(
+		ruta_slot(slot_actual),
+		_construir_datos(escena.scene_file_path)
+	)
+
+	if guardado:
+		print("[Guardado] Estado actual guardado en slot ", slot_actual)
+
+	return guardado
+
+
 func cargar_partida(slot: int) -> bool:
 	ultimo_error = ""
 
@@ -182,10 +210,14 @@ func cargar_partida(slot: int) -> bool:
 	GameState.monedas_recogidas = _a_textos(datos.get("monedas_recogidas", []))
 	GameState.llaves_obtenidas = _a_textos(datos.get("llaves_obtenidas", []))
 	GameState.puertas_abiertas = _a_textos(datos.get("puertas_abiertas", []))
+
 	GameState.dash_desbloqueado = bool(datos.get("dash_desbloqueado", false))
 	GameState.zona_virus_completada = bool(datos.get("zona_virus_completada", false))
 
+	GameState.dialogos_vistos = _a_textos(datos.get("dialogos_vistos", []))
+
 	print("[Carga] Slot ", slot, ": ", GameState.monedas_recogidas.size(), " monedas, ", GameState.virus_derrotados.size(), " virus, ", GameState.items_recogidos.size(), " items, ", GameState.llaves_obtenidas.size(), " llaves, ", GameState.puertas_abiertas.size(), " puertas")
+	print("[Carga] Diálogos vistos: ", GameState.dialogos_vistos)
 
 	GameState.cargando_partida = true
 
@@ -206,8 +238,6 @@ func borrar_slot(slot: int) -> void:
 		_borrar_archivos(ruta_slot(slot))
 
 
-# ======================= UTILIDADES =======================
-
 func tiempo_total() -> float:
 	return _tiempo_acumulado + float(Time.get_ticks_msec() - _inicio_sesion_ms) / 1000.0
 
@@ -224,7 +254,6 @@ func formatear_tiempo(segundos: float) -> String:
 	return "%02d:%02d:%02d" % [horas, minutos, total % 60]
 
 
-# "2026-10-29 14:30:00" -> "29/10/2026 14:30"
 func formatear_fecha(texto: String) -> String:
 	var partes := texto.split(" ")
 
@@ -239,8 +268,6 @@ func formatear_fecha(texto: String) -> String:
 
 	return "%s/%s/%s %s:%s" % [fecha[2], fecha[1], fecha[0], hora[0], hora[1]]
 
-
-# ======================= INTERNO =======================
 
 func _construir_datos(nivel: String) -> Dictionary:
 	return {
@@ -257,12 +284,15 @@ func _construir_datos(nivel: String) -> Dictionary:
 		"puertas_abiertas": _a_textos(GameState.puertas_abiertas),
 		"dash_desbloqueado": bool(GameState.dash_desbloqueado),
 		"zona_virus_completada": bool(GameState.zona_virus_completada),
+
+		# Guardar diálogos vistos
+		"dialogos_vistos": _a_textos(GameState.dialogos_vistos),
+
 		"tiempo_jugado": tiempo_total(),
 		"fecha": Time.get_datetime_string_from_system(false, true)
 	}
 
 
-# Si el nivel guardado no abre, se empieza desde el nivel inicial (sin checkpoint)
 func _reintentar_con_nivel_inicial() -> bool:
 	if _puede_reintentar:
 		_puede_reintentar = false
@@ -282,8 +312,6 @@ func _on_carga_fallida(motivo: String) -> void:
 	error_de_carga.emit(motivo)
 
 
-# Abre un nivel mostrando la pantalla de carga (si esta instalada) y,
-# si no, cambia de escena directo. Dice exactamente por que falla.
 func _abrir_nivel(ruta: String) -> bool:
 	var pantalla = get_node_or_null("/root/PantallaCarga")
 
@@ -344,7 +372,6 @@ func _leer_json(ruta: String) -> Dictionary:
 	return datos
 
 
-# Lee el slot; si el archivo principal esta danado usa la copia de seguridad (.bak)
 func _leer_datos_slot(slot: int) -> Dictionary:
 	var ruta := ruta_slot(slot)
 
@@ -362,8 +389,6 @@ func _leer_datos_slot(slot: int) -> Dictionary:
 	return {}
 
 
-# Escribe en un archivo temporal, lo verifica y recien despues reemplaza el real.
-# Asi, si se corta la luz o falla algo a la mitad, la partida anterior no se pierde.
 func _escribir_seguro(ruta: String, datos: Dictionary) -> bool:
 	var temporal := ruta + ".tmp"
 	var texto := JSON.stringify(datos, "\t")
@@ -390,7 +415,6 @@ func _escribir_seguro(ruta: String, datos: Dictionary) -> bool:
 	var resultado := DirAccess.rename_absolute(_abs(temporal), _abs(ruta))
 
 	if resultado != OK:
-		# Plan B: escribir directo sobre el archivo final
 		var directo := FileAccess.open(ruta, FileAccess.WRITE)
 
 		if directo == null:

@@ -36,10 +36,8 @@ var accion_pendiente: Callable = Callable()
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
-	# Iniciar música del menú
 	musica_menu.play()
 
-	# La ventana vieja de confirmacion ya no se usa
 	var ventana_vieja = get_node_or_null("VentanaNuevaPartida")
 
 	if ventana_vieja != null:
@@ -51,7 +49,6 @@ func _ready() -> void:
 	continuar_partida.pressed.connect(_on_continuar_partida_pressed)
 	salir.pressed.connect(_on_salir_pressed)
 
-	# Sonido para los botones principales, excepto SALIR
 	nueva_partida.pressed.connect(_reproducir_sonido_boton)
 	continuar_partida.pressed.connect(_reproducir_sonido_boton)
 
@@ -60,7 +57,6 @@ func _ready() -> void:
 	_actualizar_boton_continuar()
 
 
-# Reproducir sonido de botones
 func _reproducir_sonido_boton() -> void:
 	sonido_boton.play()
 
@@ -79,7 +75,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
-# ======================= MENU PRINCIPAL =======================
 
 func _on_nueva_partida_pressed() -> void:
 	modo = Modo.NUEVA
@@ -95,7 +90,6 @@ func _on_salir_pressed() -> void:
 	get_tree().quit()
 
 
-# "Continuar" queda apagado si no hay ninguna partida guardada
 func _actualizar_boton_continuar() -> void:
 	var hay_partida: bool = SaveManager.hay_alguna_partida_valida()
 
@@ -109,7 +103,6 @@ func _actualizar_boton_continuar() -> void:
 		continuar_partida.modulate = Color(1, 1, 1, 0.4)
 
 
-# ======================= PANEL DE SLOTS =======================
 
 func _abrir_panel() -> void:
 	if modo == Modo.NUEVA:
@@ -161,7 +154,6 @@ func _refrescar_slots() -> void:
 
 
 func _on_slot_pressed(slot: int) -> void:
-	# Mientras se pide confirmacion, los slots no responden
 	if ventana_confirmar.visible:
 		return
 
@@ -181,7 +173,6 @@ func _on_slot_pressed(slot: int) -> void:
 		_iniciar_nueva(slot)
 
 
-# Se llama si la pantalla de carga no pudo abrir el nivel
 func _on_error_de_carga(motivo: String) -> void:
 	_mostrar_mensaje("NO SE PUDO ABRIR EL NIVEL: " + motivo.to_upper())
 
@@ -216,7 +207,6 @@ func _mostrar_mensaje(texto: String) -> void:
 		mensaje.visible = false
 
 
-# ======================= VENTANA DE CONFIRMACION =======================
 
 func _pedir_confirmacion(texto: String, accion: Callable) -> void:
 	texto_confirmar.text = texto
@@ -239,7 +229,6 @@ func _on_cancelar_pressed() -> void:
 	accion_pendiente = Callable()
 
 
-# ======================= CONSTRUCCION DE LA INTERFAZ =======================
 
 func _crear_panel_slots() -> void:
 	panel_slots = Control.new()
@@ -306,7 +295,6 @@ func _crear_panel_slots() -> void:
 	volver.pressed.connect(_cerrar_panel)
 	caja.add_child(volver)
 
-	# Siempre al final: asi queda por encima de todo lo demas
 	_crear_ventana_confirmacion()
 
 
@@ -390,7 +378,6 @@ func _crear_boton(texto: String, tamano: int, minimo: Vector2) -> Button:
 	boton.add_theme_stylebox_override("focus", _estilo(COLOR_FONDO_HOVER, COLOR_TEXTO, 3, 8))
 	boton.add_theme_stylebox_override("disabled", _estilo(COLOR_FONDO_OFF, COLOR_BORDE, 3, 8))
 
-	# Todos los botones creados aquí reproducen el sonido
 	boton.pressed.connect(_reproducir_sonido_boton)
 
 	return boton

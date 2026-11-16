@@ -14,7 +14,10 @@
 [ext_resource type="AudioStream" uid="uid://doj6o1jypuupd" path="res://sounds/Boton.mp3" id="12_5n2xq"]
 
 [sub_resource type="GDScript" id="GDScript_o8cer"]
-script/source = "extends Node2D
+script/source = "
+extends Node2D
+
+const ID_DIALOGO = \"dialogo3\"
 
 var lyn_actual: CharacterBody2D = null
 
@@ -25,7 +28,6 @@ var dialogo_terminado = false
 @onready var area: Area2D = $Area2D
 @onready var fondo: Sprite2D = $CanvasLayer/Fondo
 
-# Sprites de Protonus
 @onready var proton1: Sprite2D = $CanvasLayer/Protonus/Proton1
 @onready var proton2: Sprite2D = $CanvasLayer/Protonus/Proton2
 
@@ -35,7 +37,6 @@ var dialogo_terminado = false
 	$CanvasLayer/Texto3
 ]
 
-# Nombres que aparecen junto a cada texto.
 @onready var nombres: Array[Label] = [
 	$CanvasLayer/Nombre1,
 	$CanvasLayer/Nombre2,
@@ -48,10 +49,8 @@ var dialogo_terminado = false
 	$CanvasLayer/Audio3
 ]
 
-# Sonido al avanzar el diálogo
 @onready var sonido_saltear: AudioStreamPlayer = $CanvasLayer/Saltear
 
-# Elementos para indicar que se puede avanzar
 @onready var avanza: Sprite2D = $CanvasLayer/Avanza/Sprite2D
 @onready var label_avanza: Label = $CanvasLayer/Avanza/Label
 @onready var label_avanza2: Label = $CanvasLayer/Avanza/Label2
@@ -62,32 +61,43 @@ var dialogo_terminado = false
 	$CanvasLayer/ReaccionesLyn/Reaccion3
 ]
 
-# 0 = Reaccion1
-# 1 = Reaccion2
-# 2 = Reaccion3
 var reacciones_por_texto: Array[int] = [
-	1, # Texto1
-	2, # Texto2
-	2, # Texto3
+	1,
+	2,
+	2
 ]
 
-# 0 = Proton1
-# 1 = Proton2
 var proton_por_texto: Array[int] = [
-	0, # Texto1 -> Proton1
-	1, # Texto2 -> Proton2
-	1, # Texto3 -> Proton2
+	0,
+	1,
+	1
 ]
 
 
 func _ready() -> void:
+
+	ocultar_todo()
+
+	if GameState.dialogos_vistos.has(ID_DIALOGO):
+
+		dialogo_terminado = true
+		dialogo_activo = false
+
+		area.set_deferred(\"monitoring\", false)
+		area.set_deferred(\"monitorable\", false)
+
+		return
+
+	area.body_entered.connect(_on_body_entered)
+
+
+func ocultar_todo() -> void:
 
 	fondo.hide()
 
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar los nombres al iniciar.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
@@ -97,15 +107,15 @@ func _ready() -> void:
 	proton1.hide()
 	proton2.hide()
 
-	# Ocultar los elementos para avanzar.
 	avanza.hide()
 	label_avanza.hide()
 	label_avanza2.hide()
 
-	area.body_entered.connect(_on_body_entered)
+	detener_todos_los_audios()
+
+	sonido_saltear.stop()
 
 
-# Devuelve los dos nodos de nombre sin repetirlos.
 func get_nombres_unicos() -> Array[Label]:
 	return [
 		$CanvasLayer/Nombre1,
@@ -116,6 +126,9 @@ func get_nombres_unicos() -> Array[Label]:
 func _on_body_entered(body: Node2D) -> void:
 
 	if dialogo_terminado or dialogo_activo:
+		return
+
+	if GameState.dialogos_vistos.has(ID_DIALOGO):
 		return
 
 	if body.name != \"Lyn Personaje\":
@@ -146,35 +159,29 @@ func mostrar_dialogo() -> void:
 		finalizar_dialogo()
 		return
 
-	# Ocultar todos los textos.
 	for texto in textos:
 		texto.hide()
 
-	# Ocultar todos los nombres.
 	for nombre in get_nombres_unicos():
 		nombre.hide()
 
-	# Ocultar todas las reacciones.
 	for reaccion in reacciones:
 		reaccion.hide()
 
-	# Ocultar los sprites de Protonus.
 	proton1.hide()
 	proton2.hide()
 
 	detener_todos_los_audios()
 
-	# Mostrar el texto correspondiente.
 	textos[indice_dialogo].show()
 
-	# Mostrar el nombre correspondiente.
 	nombres[indice_dialogo].show()
 
-	# Mostrar la reacción correspondiente.
 	var indice_reaccion = reacciones_por_texto[indice_dialogo]
-	reacciones[indice_reaccion].show()
 
-	# Mostrar el sprite correspondiente de Protonus.
+	if indice_reaccion >= 0:
+		reacciones[indice_reaccion].show()
+
 	var indice_proton = proton_por_texto[indice_dialogo]
 
 	if indice_proton == 0:
@@ -182,7 +189,6 @@ func mostrar_dialogo() -> void:
 	else:
 		proton2.show()
 
-	# Mostrar el indicador para avanzar.
 	avanza.show()
 
 	if indice_dialogo == textos.size() - 1:
@@ -192,7 +198,6 @@ func mostrar_dialogo() -> void:
 		label_avanza.show()
 		label_avanza2.hide()
 
-	# Reproducir el audio correspondiente.
 	if audios[indice_dialogo].stream != null:
 		audios[indice_dialogo].play()
 
@@ -210,7 +215,6 @@ func _input(event: InputEvent) -> void:
 
 	if event.is_action_pressed(\"ui_e\") and not event.is_echo():
 
-		# Reproducir el sonido cada vez que se pulsa E.
 		if sonido_saltear.stream != null:
 			sonido_saltear.play()
 
@@ -237,28 +241,23 @@ func finalizar_dialogo() -> void:
 
 	detener_todos_los_audios()
 
-	fondo.hide()
-
-	for texto in textos:
-		texto.hide()
-
-	for nombre in get_nombres_unicos():
-		nombre.hide()
-
-	for reaccion in reacciones:
-		reaccion.hide()
-
-	proton1.hide()
-	proton2.hide()
-
-	# Ocultar el indicador para avanzar.
-	avanza.hide()
-	label_avanza.hide()
-	label_avanza2.hide()
+	ocultar_todo()
 
 	if lyn_actual != null:
+
 		lyn_actual.bloqueada_por_dialogo = false
 
+
+	if not GameState.dialogos_vistos.has(ID_DIALOGO):
+
+		GameState.dialogos_vistos.append(ID_DIALOGO)
+
+		var guardado = SaveManager.guardar_estado_actual()
+
+		if not guardado:
+			print(\"[Dialogo3] ERROR al guardar: \", SaveManager.ultimo_error)
+
+	# Desactivar el área.
 	area.set_deferred(\"monitoring\", false)
 	area.set_deferred(\"monitorable\", false)
 "

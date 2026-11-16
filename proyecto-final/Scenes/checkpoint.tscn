@@ -47,7 +47,7 @@ func activar_checkpoint(lyn: Node2D) -> void:
 
 	ya_usado = true
 
-	# Reproducir sonido al activar el checkpoint
+
 	sonido_guarda.play()
 
 	set_deferred(\"monitoring\", false)

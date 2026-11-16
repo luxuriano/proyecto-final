@@ -17,6 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Proyecto Final"
 run/main_scene="uid://dnfauvkt3db5p"
 config/features=PackedStringArray("4.6", "Mobile")
+boot_splash/show_image=false
 config/icon="res://icon.svg"
 
 [autoload]
