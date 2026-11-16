@@ -272,9 +272,10 @@ func finalizar_dialogo() -> void:
 
 	if lyn_actual != null:
 		lyn_actual.bloqueada_por_dialogo = false
-
+	
 	area.set_deferred(\"monitoring\", false)
 	area.set_deferred(\"monitorable\", false)
+	
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iw6dv"]

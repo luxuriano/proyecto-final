@@ -99,7 +99,6 @@ var proton_por_texto: Array[int] = [
 	1   # Texto5 -> Proton2
 ]
 
-
 func _ready() -> void:
 
 	fondo.hide()

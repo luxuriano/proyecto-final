@@ -15,6 +15,8 @@ var cargando_partida = false
 var items_recogidos = []
 var virus_derrotados = []
 var monedas_recogidas = []
+var llaves_obtenidas = []
+var puertas_abiertas = []
 
 var zona_virus_completada = false
 
@@ -48,6 +50,8 @@ func reiniciar() -> void:
 	items_recogidos.clear()
 	virus_derrotados.clear()
 	monedas_recogidas.clear()
+	llaves_obtenidas.clear()
+	puertas_abiertas.clear()
 
 	zona_virus_completada = false
 

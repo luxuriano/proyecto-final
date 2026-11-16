@@ -64,8 +64,10 @@ var facing_direction = 1
 
 var tiene_llave = false
 
-# Guardar las llaves recogidas por separado
-var llaves_obtenidas: Array[String] = []
+# Las llaves viven en GameState: asi se guardan en la partida y no se pierden al cambiar de escena
+var llaves_obtenidas: Array:
+	get:
+		return GameState.llaves_obtenidas
 
 # Bloqueo durante el diálogo
 var bloqueada_por_dialogo = false
@@ -148,6 +150,9 @@ func _ready() -> void:
 	camara_lyn.enabled = true
 
 	sprite.play(\"Quieta\")
+
+	# Saca del nivel las llaves que ya se recogieron en esta partida
+	call_deferred(\"_quitar_llaves_recogidas\")
 
 	$PegarDer.set_deferred(\"monitoring\", false)
 	$PegarDer.set_deferred(\"monitorable\", false)
@@ -362,6 +367,18 @@ func actualizar_animacion() -> void:
 			sprite.play(\"Moverse\")
 		else:
 			sprite.play(\"Quieta\")
+
+
+# QUITAR DEL NIVEL LAS LLAVES YA RECOGIDAS
+func _quitar_llaves_recogidas() -> void:
+	var escena = get_tree().current_scene
+
+	if escena == null:
+		return
+
+	for nodo in escena.find_children(\"*\", \"Area2D\", true, false):
+		if \"id_llave\" in nodo and GameState.llaves_obtenidas.has(nodo.id_llave):
+			nodo.queue_free()
 
 
 # DESBLOQUEAR DASH AL RECOGER LA MEMORIA RAM

@@ -44,7 +44,10 @@ func leer_resumen(slot: int) -> Dictionary:
 		"puntos": 0,
 		"vida": VIDA_MAXIMA,
 		"tiempo": 0.0,
-		"fecha": ""
+		"fecha": "",
+		"anim1": true,
+		"anim2": true,
+		"anim3": true
 	}
 
 	if not slot_valido(slot):
@@ -135,6 +138,7 @@ func guardar_partida(lyn, posicion: Vector2) -> bool:
 
 	if guardado:
 		print("[Guardado] OK slot ", slot_actual, " en ", ProjectSettings.globalize_path(ruta_slot(slot_actual)))
+		print("[Guardado] ", GameState.monedas_recogidas.size(), " monedas, ", GameState.virus_derrotados.size(), " virus, ", GameState.items_recogidos.size(), " items, ", GameState.llaves_obtenidas.size(), " llaves, ", GameState.puertas_abiertas.size(), " puertas")
 
 	return guardado
 
@@ -176,7 +180,12 @@ func cargar_partida(slot: int) -> bool:
 	GameState.items_recogidos = _a_textos(datos.get("items_recogidos", []))
 	GameState.virus_derrotados = _a_textos(datos.get("virus_derrotados", []))
 	GameState.monedas_recogidas = _a_textos(datos.get("monedas_recogidas", []))
+	GameState.llaves_obtenidas = _a_textos(datos.get("llaves_obtenidas", []))
+	GameState.puertas_abiertas = _a_textos(datos.get("puertas_abiertas", []))
+	GameState.dash_desbloqueado = bool(datos.get("dash_desbloqueado", false))
 	GameState.zona_virus_completada = bool(datos.get("zona_virus_completada", false))
+
+	print("[Carga] Slot ", slot, ": ", GameState.monedas_recogidas.size(), " monedas, ", GameState.virus_derrotados.size(), " virus, ", GameState.items_recogidos.size(), " items, ", GameState.llaves_obtenidas.size(), " llaves, ", GameState.puertas_abiertas.size(), " puertas")
 
 	GameState.cargando_partida = true
 
@@ -244,6 +253,9 @@ func _construir_datos(nivel: String) -> Dictionary:
 		"items_recogidos": _a_textos(GameState.items_recogidos),
 		"virus_derrotados": _a_textos(GameState.virus_derrotados),
 		"monedas_recogidas": _a_textos(GameState.monedas_recogidas),
+		"llaves_obtenidas": _a_textos(GameState.llaves_obtenidas),
+		"puertas_abiertas": _a_textos(GameState.puertas_abiertas),
+		"dash_desbloqueado": bool(GameState.dash_desbloqueado),
 		"zona_virus_completada": bool(GameState.zona_virus_completada),
 		"tiempo_jugado": tiempo_total(),
 		"fecha": Time.get_datetime_string_from_system(false, true)
