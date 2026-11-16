@@ -41,6 +41,7 @@ func _ready() -> void:
 	nueva_partida.pressed.connect(_on_nueva_partida_pressed)
 	continuar_partida.pressed.connect(_on_continuar_partida_pressed)
 	salir.pressed.connect(_on_salir_pressed)
+	SaveManager.error_de_carga.connect(_on_error_de_carga)
 
 	_actualizar_boton_continuar()
 
@@ -159,6 +160,11 @@ func _on_slot_pressed(slot: int) -> void:
 		)
 	else:
 		_iniciar_nueva(slot)
+
+
+# Se llama si la pantalla de carga no pudo abrir el nivel
+func _on_error_de_carga(motivo: String) -> void:
+	_mostrar_mensaje("NO SE PUDO ABRIR EL NIVEL: " + motivo.to_upper())
 
 
 func _iniciar_nueva(slot: int) -> void:

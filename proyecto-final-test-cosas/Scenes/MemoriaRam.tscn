@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://d4bb4hl6hc7pj"]
+
+[ext_resource type="Texture2D" uid="uid://bff26tuwmqr1g" path="res://Sprites ítems/Ram.png" id="1_t7x7b"]
+[ext_resource type="AudioStream" uid="uid://1n7w3b6f6j7x" path="res://sounds/Ram.mp3" id="2_falct"]
+
+[sub_resource type="GDScript" id="GDScript_falct"]
+script/source = "
+extends Area2D
+
+var recogida = false
+
+@onready var sonido_ram: AudioStreamPlayer = $Ram
+
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if recogida:
+		return
+
+	# Comprobar que el cuerpo que toca la memoria sea Lyn
+	if body.name != \"Lyn Personaje\":
+		return
+
+	recogida = true
+
+	# Desactivar la detección inmediatamente
+	set_deferred(\"monitoring\", false)
+	set_deferred(\"monitorable\", false)
+
+	# Desbloquear la habilidad de dash
+	if body.has_method(\"desbloquear_dash\"):
+		body.desbloquear_dash()
+
+	# Reproducir sonido
+	sonido_ram.play()
+
+	# Hacer desaparecer la memoria inmediatamente
+	$Sprite2D.hide()
+
+	var collision = get_node_or_null(\"CollisionShape2D\")
+	if collision != null:
+		collision.set_deferred(\"disabled\", true)
+
+	# Esperar a que termine el sonido antes de eliminar la escena
+	await sonido_ram.finished
+
+	queue_free()
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1fwm5"]
+
+[node name="Ram" type="Area2D" unique_id=39025843]
+collision_layer = 2
+collision_mask = 2
+script = SubResource("GDScript_falct")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1315197586]
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("1_t7x7b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2003215634]
+scale = Vector2(4, 4)
+shape = SubResource("RectangleShape2D_1fwm5")
+
+[node name="Ram" type="AudioStreamPlayer" parent="." unique_id=1345719772]
+stream = ExtResource("2_falct")

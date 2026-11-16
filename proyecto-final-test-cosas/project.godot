@@ -25,6 +25,7 @@ DialogueManager="*uid://cr33mss3ywc87"
 GameState="*uid://3otrk2c3s2fh"
 SaveManager="*uid://l3r0juouw44h"
 PauseMenu="*uid://bfwbqho08qwaq"
+PantallaCarga="*res://Scenes/pantalla_carga.tscn"
 
 [display]
 

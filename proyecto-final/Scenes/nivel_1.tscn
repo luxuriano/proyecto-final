@@ -18,7 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://de6vxyxa857tm" path="res://Sprites para el fondo/Mandarinas.png" id="8_5va5w"]
 [ext_resource type="Texture2D" uid="uid://dyffulv11n4ej" path="res://Sprites Menu/Fondo menu.png" id="8_hkimd"]
 [ext_resource type="Texture2D" uid="uid://bu16j44co1ok4" path="res://Sprites estatuas/Portalrojo3.png" id="8_t31ra"]
-[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/lyn_personaje.tscn" id="9_m5wsa"]
+[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/Lyn personaje.tscn" id="9_m5wsa"]
 [ext_resource type="PackedScene" uid="uid://xwl64fksjla2" path="res://Scenes/estatua_guardado.tscn" id="10_3xy45"]
 [ext_resource type="PackedScene" uid="uid://dbl7xea4crc6j" path="res://Scenes/moneda.tscn" id="10_gh6o0"]
 [ext_resource type="Texture2D" uid="uid://duukdr0rvgsme" path="res://Sprites interfaz/Cinco vidas.png" id="10_guoqe"]
@@ -35,6 +35,7 @@
 [ext_resource type="PackedScene" uid="uid://cdtnnmvc1h1m" path="res://Scenes/dialogo.tscn" id="33_evhcb"]
 [ext_resource type="PackedScene" uid="uid://q2ntrb7oaudh" path="res://Scenes/dialogos2.tscn" id="34_eguv3"]
 [ext_resource type="PackedScene" uid="uid://b3apf41lhqk2d" path="res://Scenes/dialogos3.tscn" id="35_u5rtf"]
+[ext_resource type="Script" uid="uid://bcu4wdmrsvgew" path="res://Scenes/final_collishion.gd" id="36_77spe"]
 
 [sub_resource type="GDScript" id="GDScript_rjvxo"]
 script/source = "extends Node2D
@@ -43,6 +44,7 @@ script/source = "extends Node2D
 
 
 func _ready() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	musica.play()
 	musica.finished.connect(_on_musica_terminada)
 
@@ -12449,6 +12451,9 @@ func _al_salir(body: Node2D) -> void:
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5iadn"]
 size = Vector2(321, 113)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yk7dw"]
+size = Vector2(208, 142)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3xy45"]
 texture = ExtResource("7_vpq0c")
 0:0/0 = 0
@@ -17087,6 +17092,16 @@ position = Vector2(8169, -2373)
 [node name="Virus11" parent="Viruses" unique_id=1873415988 instance=ExtResource("8_3digf")]
 position = Vector2(11087, -8213)
 
+[node name="Final" type="Node2D" parent="." unique_id=625417237]
+position = Vector2(20973, -8352)
+
+[node name="Final_collishion" type="Area2D" parent="Final" unique_id=952801819]
+script = ExtResource("36_77spe")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Final/Final_collishion" unique_id=2018938377]
+position = Vector2(1280, 99)
+shape = SubResource("RectangleShape2D_yk7dw")
+
 [node name="Lyn Personaje" parent="." unique_id=888920584 instance=ExtResource("9_m5wsa")]
 position = Vector2(101, -90)
 
@@ -17213,3 +17228,5 @@ position = Vector2(4677, -1525)
 
 [node name="dialogos3" parent="." unique_id=207188097 instance=ExtResource("35_u5rtf")]
 position = Vector2(7039, -7278)
+
+[connection signal="body_entered" from="Final/Final_collishion" to="Final/Final_collishion" method="_on_body_entered"]

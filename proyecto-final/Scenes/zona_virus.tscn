@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dd5f3ehyftc0i" path="res://Sprites para el fondo/Fondo 3.png" id="3_3sed0"]
 [ext_resource type="Texture2D" uid="uid://suhqjrrxjuh0" path="res://Sprites estatuas/Portalrojo2.png" id="3_kijqh"]
 [ext_resource type="Texture2D" uid="uid://bu16j44co1ok4" path="res://Sprites estatuas/Portalrojo3.png" id="4_5pa20"]
-[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/lyn_personaje.tscn" id="5_5np0y"]
+[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/Lyn personaje.tscn" id="5_5np0y"]
 [ext_resource type="Texture2D" uid="uid://di6ceg0hduy0p" path="res://Sprites ítems/Pera de Oro.png" id="6_2u6w7"]
 [ext_resource type="PackedScene" uid="uid://ciy0ymi2eqx3x" path="res://Scenes/Virus.tscn" id="6_hb5dr"]
 [ext_resource type="Texture2D" uid="uid://duukdr0rvgsme" path="res://Sprites interfaz/Cinco vidas.png" id="7_2ga1y"]

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bfsg1o1mijuw1" path="res://TEST/Scene/test_scene.gd" id="1_idhfc"]
 [ext_resource type="TileSet" uid="uid://cwddjicfnqpth" path="res://tileset/tilemap.tres" id="3_ad4ck"]
-[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/lyn_personaje.tscn" id="3_wds2k"]
+[ext_resource type="PackedScene" uid="uid://dpj8mfr0jpes5" path="res://Scenes/Lyn personaje.tscn" id="3_wds2k"]
 [ext_resource type="PackedScene" uid="uid://ctx1qm0i7vg5l" path="res://Scenes/item_curacion.tscn" id="4_6txjk"]
 [ext_resource type="PackedScene" uid="uid://cdu6gp6y6gr75" path="res://Scenes/portal.tscn" id="4_w6yj6"]
 [ext_resource type="Texture2D" uid="uid://duukdr0rvgsme" path="res://Sprites interfaz/Cinco vidas.png" id="5_qumu6"]

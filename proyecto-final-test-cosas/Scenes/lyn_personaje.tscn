@@ -16,14 +16,21 @@
 [ext_resource type="Texture2D" uid="uid://dty7ofl3hs312" path="res://Lyn Assets/Lyn pegando/Pegando 1.png" id="9_bwum6"]
 [ext_resource type="Texture2D" uid="uid://d1kxh83yrui2h" path="res://Lyn Assets/Lyn pegando/Pegando 2.png" id="10_p0go5"]
 [ext_resource type="Texture2D" uid="uid://l8soaxdkd27w" path="res://Lyn Assets/Lyn moviéndose/Saltando (1).png" id="16_udx3f"]
+[ext_resource type="AudioStream" uid="uid://dqesvaskm02n4" path="res://sounds/Sonido Muerte.wav" id="17_bmgmp"]
+[ext_resource type="AudioStream" uid="uid://witt7260f1sv" path="res://sounds/Salto.wav" id="18_udx3f"]
+[ext_resource type="AudioStream" uid="uid://dpjbpi8pk2yqp" path="res://sounds/Correr.mp3" id="19_mdx60"]
+[ext_resource type="AudioStream" uid="uid://djwyvrta4p46c" path="res://sounds/Golpe.mp3" id="20_v4gsr"]
+[ext_resource type="AudioStream" uid="uid://br8eqrhsy7ceh" path="res://sounds/Sonido de Dano.mp3" id="21_aqbrr"]
+[ext_resource type="AudioStream" uid="uid://dqynvoynwfvsq" path="res://sounds/Dash.mp3" id="22_bdyya"]
 
 [sub_resource type="GDScript" id="GDScript_mdx60"]
-script/source = "extends CharacterBody2D
+script/source = "
+extends CharacterBody2D
 
 const SPEED = 800.0
 const JUMP_VELOCITY = -600.0
 
-const DASH_SPEED = 1600.0
+const DASH_SPEED = 2800.0
 const DASH_DURATION = 0.15
 const DASH_COOLDOWN = 1.0
 
@@ -32,6 +39,14 @@ const TIEMPO_DERROTA = 2.0
 const TIEMPO_ATAQUE = 0.5
 const TIEMPO_COOLDOWN_ATAQUE = 0.3
 
+const TIEMPO_FUNDIDO = 0.8
+
+# Coyote Time
+const COYOTE_TIME = 0.15
+var coyote_timer = 0.0
+
+# Dash
+var puede_hacer_dash = false
 var is_dashing = false
 var dash_timer = 0.0
 var dash_cooldown_timer = 0.0
@@ -47,7 +62,26 @@ var ataque_cooldown_timer = 0.0
 
 var facing_direction = 1
 
+var tiene_llave = false
+
+# Guardar las llaves recogidas por separado
+var llaves_obtenidas: Array[String] = []
+
+# Bloqueo durante el diálogo
+var bloqueada_por_dialogo = false
+
+# Control de cámara durante el diálogo
+var camara_desactivada_por_dialogo = false
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var camara_lyn: Camera2D = $Camera2D
+@onready var pantalla_negra: ColorRect = get_tree().current_scene.get_node(\"Transicion/ColorRect\")
+@onready var sonido_muerte: AudioStreamPlayer = $Sonidos/Muerte
+@onready var sonido_salto: AudioStreamPlayer = $Sonidos/Salto
+@onready var sonido_correr: AudioStreamPlayer = $Sonidos/Correr
+@onready var sonido_golpe: AudioStreamPlayer = $Sonidos/Golpe
+@onready var sonido_dano: AudioStreamPlayer = $Sonidos/Dano
+@onready var sonido_dash: AudioStreamPlayer = $Sonidos/Dash
 
 @export var vida = 5
 const VIDA_MAXIMA = 5
@@ -62,6 +96,8 @@ var tiene_checkpoint = false
 func _ready() -> void:
 
 	posicion_inicial = global_position
+
+	pantalla_negra.color = Color(0, 0, 0, 0)
 
 	if GameState.cargando_partida:
 
@@ -105,22 +141,56 @@ func _ready() -> void:
 	GameState.volviendo_desde_zona_virus = false
 	GameState.cargando_partida = false
 
+	camara_desactivada_por_dialogo = false
+	camara_lyn.enabled = true
+
 	sprite.play(\"Quieta\")
 
-	$PegarDer.monitoring = false
-	$PegarDer.monitorable = false
+	$PegarDer.set_deferred(\"monitoring\", false)
+	$PegarDer.set_deferred(\"monitorable\", false)
 
-	$PegarIzq.monitoring = false
-	$PegarIzq.monitorable = false
+	$PegarIzq.set_deferred(\"monitoring\", false)
+	$PegarIzq.set_deferred(\"monitorable\", false)
 
 
 func _physics_process(delta: float) -> void:
+
+	# BLOQUEO DURANTE EL DIÁLOGO
+	if bloqueada_por_dialogo:
+
+		velocity.x = 0
+
+		if not is_on_floor():
+			velocity += get_gravity() * delta
+		else:
+			velocity.y = 0
+
+		sonido_correr.stop()
+
+		if facing_direction == 1:
+			sprite.flip_h = false
+		else:
+			sprite.flip_h = true
+
+		if is_on_floor():
+			if sprite.animation != \"Quieta\":
+				sprite.play(\"Quieta\")
+		else:
+			if velocity.y < 0:
+				sprite.play(\"Salto\")
+			else:
+				sprite.play(\"Caida\")
+
+		move_and_slide()
+		return
 
 	if dash_cooldown_timer > 0:
 		dash_cooldown_timer -= delta
 
 	if ataque_cooldown_timer > 0:
 		ataque_cooldown_timer -= delta
+
+	actualizar_sonido_correr()
 
 	if esta_derrotado:
 		velocity = Vector2.ZERO
@@ -155,11 +225,11 @@ func _physics_process(delta: float) -> void:
 		if tiempo_ataque <= 0:
 			esta_atacando = false
 
-			$PegarDer.monitoring = false
-			$PegarDer.monitorable = false
+			$PegarDer.set_deferred(\"monitoring\", false)
+			$PegarDer.set_deferred(\"monitorable\", false)
 
-			$PegarIzq.monitoring = false
-			$PegarIzq.monitorable = false
+			$PegarIzq.set_deferred(\"monitoring\", false)
+			$PegarIzq.set_deferred(\"monitorable\", false)
 
 			ataque_cooldown_timer = TIEMPO_COOLDOWN_ATAQUE
 
@@ -177,20 +247,22 @@ func _physics_process(delta: float) -> void:
 
 		velocity = Vector2.ZERO
 
-		if facing_direction == 1:
-			$PegarDer.monitoring = true
-			$PegarDer.monitorable = true
+		sonido_golpe.play()
 
-			$PegarIzq.monitoring = false
-			$PegarIzq.monitorable = false
+		if facing_direction == 1:
+			$PegarDer.set_deferred(\"monitoring\", true)
+			$PegarDer.set_deferred(\"monitorable\", true)
+
+			$PegarIzq.set_deferred(\"monitoring\", false)
+			$PegarIzq.set_deferred(\"monitorable\", false)
 
 			sprite.flip_h = false
 		else:
-			$PegarIzq.monitoring = true
-			$PegarIzq.monitorable = true
+			$PegarIzq.set_deferred(\"monitoring\", true)
+			$PegarIzq.set_deferred(\"monitorable\", true)
 
-			$PegarDer.monitoring = false
-			$PegarDer.monitorable = false
+			$PegarDer.set_deferred(\"monitoring\", false)
+			$PegarDer.set_deferred(\"monitorable\", false)
 
 			sprite.flip_h = true
 
@@ -199,10 +271,14 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	if Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
+	# DASH: solamente se puede usar después de recoger la MemoriaRam
+	if puede_hacer_dash and Input.is_action_just_pressed(\"ui_shift\") and not is_dashing and dash_cooldown_timer <= 0:
 		is_dashing = true
 		dash_timer = DASH_DURATION
 		dash_cooldown_timer = DASH_COOLDOWN
+
+		# Reproducir sonido al iniciar el dash
+		sonido_dash.play()
 
 	if is_dashing:
 		velocity.x = facing_direction * DASH_SPEED
@@ -223,11 +299,19 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	# COYOTE TIME
+	if is_on_floor():
+		coyote_timer = COYOTE_TIME
+	else:
+		coyote_timer -= delta
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+	if Input.is_action_just_pressed(\"ui_accept\") and coyote_timer > 0:
 		velocity.y = JUMP_VELOCITY
+		coyote_timer = 0.0
+		sonido_salto.play()
 
 	var direction := Input.get_axis(\"ui_left\", \"ui_right\")
 
@@ -251,6 +335,17 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+func actualizar_sonido_correr() -> void:
+
+	var direccion = Input.get_axis(\"ui_left\", \"ui_right\")
+
+	if is_on_floor() and direccion != 0 and not esta_derrotado and not esta_recibiendo_dano and not esta_atacando and not is_dashing and not bloqueada_por_dialogo:
+		if not sonido_correr.playing:
+			sonido_correr.play()
+	else:
+		sonido_correr.stop()
+
+
 func actualizar_animacion() -> void:
 
 	if not is_on_floor():
@@ -265,6 +360,20 @@ func actualizar_animacion() -> void:
 			sprite.play(\"Moverse\")
 		else:
 			sprite.play(\"Quieta\")
+
+
+# DESBLOQUEAR DASH AL RECOGER LA MEMORIA RAM
+func desbloquear_dash() -> void:
+	puede_hacer_dash = true
+
+
+# ACTIVAR O DESACTIVAR LA CÁMARA DE LYN DESDE EL DIÁLOGO
+func controlar_camara_dialogo(desactivar: bool) -> void:
+
+	camara_desactivada_por_dialogo = desactivar
+
+	if camara_lyn != null:
+		camara_lyn.enabled = not desactivar
 
 
 func activar_checkpoint(nueva_posicion: Vector2) -> void:
@@ -294,9 +403,13 @@ func recibir_dano(cantidad: int, viene_de_derecha: bool = false) -> void:
 
 	velocity = Vector2.ZERO
 
+	# Si pierde el último corazón, morir sin reproducir el sonido Dano.
 	if vida <= 0:
 		morir()
 		return
+
+	# Reproducir Dano solamente si todavía le quedan corazones.
+	sonido_dano.play()
 
 	esta_recibiendo_dano = true
 
@@ -306,11 +419,11 @@ func recibir_dano(cantidad: int, viene_de_derecha: bool = false) -> void:
 	esta_atacando = false
 	tiempo_ataque = 0
 
-	$PegarDer.monitoring = false
-	$PegarDer.monitorable = false
+	$PegarDer.set_deferred(\"monitoring\", false)
+	$PegarDer.set_deferred(\"monitorable\", false)
 
-	$PegarIzq.monitoring = false
-	$PegarIzq.monitorable = false
+	$PegarIzq.set_deferred(\"monitoring\", false)
+	$PegarIzq.set_deferred(\"monitorable\", false)
 
 	tiempo_dano = TIEMPO_DANO
 
@@ -336,14 +449,16 @@ func morir() -> void:
 
 	velocity = Vector2.ZERO
 
-	$PegarDer.monitoring = false
-	$PegarDer.monitorable = false
+	sonido_correr.stop()
 
-	$PegarIzq.monitoring = false
-	$PegarIzq.monitorable = false
+	$PegarDer.set_deferred(\"monitoring\", false)
+	$PegarDer.set_deferred(\"monitorable\", false)
 
-	$DetectorVirus.monitoring = false
-	$DetectorVirus.monitorable = false
+	$PegarIzq.set_deferred(\"monitoring\", false)
+	$PegarIzq.set_deferred(\"monitorable\", false)
+
+	$DetectorVirus.set_deferred(\"monitoring\", false)
+	$DetectorVirus.set_deferred(\"monitorable\", false)
 
 	if puntos >= 500:
 		puntos -= 500
@@ -358,6 +473,18 @@ func morir() -> void:
 		sprite.flip_h = true
 
 	sprite.play(\"Derrota\")
+	sonido_muerte.play()
+
+	# FUNDIDO PROGRESIVO A NEGRO
+	var tween_entrada = create_tween()
+	tween_entrada.tween_property(
+		pantalla_negra,
+		\"color\",
+		Color.BLACK,
+		TIEMPO_FUNDIDO
+	)
+
+	await tween_entrada.finished
 
 	await get_tree().create_timer(TIEMPO_DERROTA).timeout
 
@@ -385,12 +512,22 @@ func morir() -> void:
 
 	sprite.flip_h = false
 
-	$DetectorVirus.monitoring = true
-	$DetectorVirus.monitorable = true
+	$DetectorVirus.set_deferred(\"monitoring\", true)
+	$DetectorVirus.set_deferred(\"monitorable\", true)
 
 	esta_derrotado = false
 
 	sprite.play(\"Quieta\")
+
+	var tween_salida = create_tween()
+	tween_salida.tween_property(
+		pantalla_negra,
+		\"color\",
+		Color(0, 0, 0, 0),
+		TIEMPO_FUNDIDO
+	)
+
+	await tween_salida.finished
 "
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_kqg6p"]
@@ -537,13 +674,36 @@ shape = SubResource("RectangleShape2D_bmgmp")
 [node name="PegarDer" type="Area2D" parent="." unique_id=1734332253]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PegarDer" unique_id=1774400383]
-position = Vector2(63.000008, -1.9999998)
+position = Vector2(25.999992, -1.9999999)
 scale = Vector2(3.4, 3.4)
 shape = SubResource("RectangleShape2D_udx3f")
 
 [node name="PegarIzq" type="Area2D" parent="." unique_id=945838065]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PegarIzq" unique_id=1218195498]
-position = Vector2(-65.00001, -3)
+position = Vector2(-25.999996, -3.9999995)
 scale = Vector2(3.4, 3.4)
 shape = SubResource("RectangleShape2D_udx3f")
+
+[node name="Sonidos" type="Node" parent="." unique_id=408406809]
+
+[node name="Muerte" type="AudioStreamPlayer" parent="Sonidos" unique_id=896158444]
+stream = ExtResource("17_bmgmp")
+volume_db = -4.108
+
+[node name="Salto" type="AudioStreamPlayer" parent="Sonidos" unique_id=2082642439]
+stream = ExtResource("18_udx3f")
+
+[node name="Correr" type="AudioStreamPlayer" parent="Sonidos" unique_id=1480448146]
+stream = ExtResource("19_mdx60")
+volume_db = -4.078
+
+[node name="Golpe" type="AudioStreamPlayer" parent="Sonidos" unique_id=829128677]
+stream = ExtResource("20_v4gsr")
+volume_db = 5.0
+
+[node name="Dano" type="AudioStreamPlayer" parent="Sonidos" unique_id=1463654324]
+stream = ExtResource("21_aqbrr")
+
+[node name="Dash" type="AudioStreamPlayer" parent="Sonidos" unique_id=970575194]
+stream = ExtResource("22_bdyya")

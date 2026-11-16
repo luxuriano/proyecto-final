@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dbvjasfkhtkny"
+path="res://.godot/imported/Virus ataque.mp3-83de9c5460c6a0a97262acb9a0b44e25.mp3str"
+
+[deps]
+
+source_file="res://sounds/Virus sounds/Virus ataque.mp3"
+dest_files=["res://.godot/imported/Virus ataque.mp3-83de9c5460c6a0a97262acb9a0b44e25.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

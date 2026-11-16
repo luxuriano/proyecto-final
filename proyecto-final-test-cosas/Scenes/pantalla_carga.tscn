@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://2pw25oa38m68"]
+
+[ext_resource type="Script" uid="uid://tkotav8h101h" path="res://Scenes/pantalla_carga.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bg7nraxd5nwd1" path="res://p_carga.png" id="2_b8s5c"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="2_fuente"]
+
+[node name="PantallaCarga" type="CanvasLayer" unique_id=1839165868]
+process_mode = 3
+layer = 200
+visible = false
+script = ExtResource("1_script")
+
+[node name="Raiz" type="Control" parent="." unique_id=1344692293]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Fondo" type="ColorRect" parent="Raiz" unique_id=2058516996]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.22, 0.12, 0.38, 1)
+
+[node name="Imagen" type="TextureRect" parent="Raiz" unique_id=1007895434]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_b8s5c")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Texto" type="Label" parent="Raiz" unique_id=464204653]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -100.0
+offset_right = -40.0
+offset_bottom = -52.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.1, 0.35, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("2_fuente")
+theme_override_font_sizes/font_size = 36
+text = "CARGANDO"
+horizontal_alignment = 2
+
+[node name="Barra" type="ProgressBar" parent="Raiz" unique_id=1406290886]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -36.0
+offset_right = -40.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+max_value = 1.0
+step = 0.001
+show_percentage = false

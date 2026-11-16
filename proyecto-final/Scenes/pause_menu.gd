@@ -64,6 +64,7 @@ func _se_puede_pausar() -> bool:
 func _abrir() -> void:
 	abierto = true
 	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	grupo_principal.visible = true
 	grupo_confirmar.visible = false
@@ -76,6 +77,7 @@ func _reanudar() -> void:
 	abierto = false
 	raiz.visible = false
 	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _pedir_confirmacion() -> void:

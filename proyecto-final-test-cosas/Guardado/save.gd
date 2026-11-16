@@ -1,4 +1,4 @@
-# Estatua del dinosaurio: al apretar E guarda la partida en el slot actual y fija el checkpoint
+
 extends Area2D
 
 var lyn_actual = null
@@ -9,6 +9,8 @@ var ocupada = false
 @onready var label_e = $LabelE
 @onready var pregunta = $Pregunta
 @onready var mensaje = $Mensaje
+@onready var fondo = $Fondo
+@onready var sonido_guarda: AudioStreamPlayer = $Guarda
 
 
 func _ready() -> void:
@@ -17,11 +19,11 @@ func _ready() -> void:
 
 	_mostrar_pregunta(false)
 	mensaje.visible = false
+	fondo.visible = false
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
-	# Solo revisa la tecla E mientras Lyn esta cerca
 	set_process(false)
 
 
@@ -40,6 +42,9 @@ func _on_body_entered(body: Node2D) -> void:
 	lyn_actual = body
 	set_process(true)
 
+	# Mostrar el fondo cuando Lyn entra.
+	fondo.visible = true
+
 	if not ocupada:
 		_mostrar_pregunta(true)
 
@@ -51,6 +56,9 @@ func _on_body_exited(body: Node2D) -> void:
 	lyn_actual = null
 	set_process(false)
 
+	# Ocultar el fondo cuando Lyn sale.
+	fondo.visible = false
+
 	_mostrar_pregunta(false)
 
 
@@ -61,12 +69,15 @@ func _guardar() -> void:
 	ocupada = true
 	_mostrar_pregunta(false)
 
+	# Reproducir sonido de guardado.
+	sonido_guarda.play()
+
 	var posicion = global_position + Vector2(0, -20)
 
-	# 1) Checkpoint: si Lyn muere reaparece aca
+	# 1) Activar checkpoint.
 	lyn_actual.activar_checkpoint(posicion)
 
-	# 2) Guardado en disco (slot elegido en el menu)
+	# 2) Guardar partida.
 	if SaveManager.guardar_partida(lyn_actual, posicion):
 		_mostrar_mensaje("Partida guardada (Slot %d)" % SaveManager.slot_actual)
 	else:

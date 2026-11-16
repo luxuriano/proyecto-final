@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ctx1qm0i7vg5l"]
 
 [ext_resource type="Texture2D" uid="uid://drca4eicnso76" path="res://Sprites ítems/Pera de Brian.png" id="1_rqbyb"]
+[ext_resource type="AudioStream" uid="uid://cmrlnvubkymxy" path="res://sounds/Item Curacion.wav" id="2_e156c"]
 
 [sub_resource type="GDScript" id="GDScript_e156c"]
 script/source = "extends CharacterBody2D
@@ -12,10 +13,12 @@ const FUERZA_DROPEO = -250.0
 
 var es_dropeado = false
 var id_item = \"\"
+var recogido = false
+
+@onready var sonido_item: AudioStreamPlayer = $SonidoItem
+
 
 func _ready() -> void:
-
-	# Solo los items puestos en el nivel se recuerdan (los que sueltan los virus no)
 	if owner != null:
 		id_item = str(get_path())
 
@@ -37,7 +40,6 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-
 	if not is_on_floor():
 		velocity.y += GRAVEDAD * delta
 	else:
@@ -47,9 +49,13 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
+	if recogido:
+		return
 
 	if body.name != \"Lyn Personaje\":
 		return
+
+	recogido = true
 
 	if body.vida < VIDA_MAXIMA:
 		body.curar(CURACION)
@@ -58,6 +64,12 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 
 	if id_item != \"\" and id_item not in GameState.items_recogidos:
 		GameState.items_recogidos.append(id_item)
+
+	var sonido = sonido_item
+	remove_child(sonido)
+	get_tree().current_scene.add_child(sonido)
+	sonido.finished.connect(sonido.queue_free)
+	sonido.play()
 
 	queue_free()
 "
@@ -91,5 +103,9 @@ collision_mask = 2
 position = Vector2(-12, -13)
 scale = Vector2(6, 6)
 shape = SubResource("CapsuleShape2D_vh3uo")
+
+[node name="SonidoItem" type="AudioStreamPlayer" parent="." unique_id=1693974398]
+stream = ExtResource("2_e156c")
+volume_db = -8.182
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

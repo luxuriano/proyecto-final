@@ -7,6 +7,9 @@ const VERSION_GUARDADO := 1
 const NIVEL_INICIAL := "res://Scenes/nivel_1.tscn"
 const VIDA_MAXIMA := 5
 
+# Se avisa cuando un nivel no se pudo abrir (el menu muestra el motivo)
+signal error_de_carga(motivo: String)
+
 # Slot en el que se esta jugando (lo elige el menu principal)
 var slot_actual: int = 1
 
@@ -15,6 +18,7 @@ var ultimo_error: String = ""
 
 var _tiempo_acumulado: float = 0.0
 var _inicio_sesion_ms: int = 0
+var _puede_reintentar: bool = false
 
 
 func _ready() -> void:
@@ -80,6 +84,7 @@ func hay_alguna_partida_valida() -> bool:
 # Empieza una partida nueva en el slot (crea el archivo enseguida)
 func nueva_partida(slot: int) -> bool:
 	ultimo_error = ""
+	_puede_reintentar = false
 
 	if not slot_valido(slot):
 		ultimo_error = "slot invalido"
@@ -96,9 +101,7 @@ func nueva_partida(slot: int) -> bool:
 	if not _escribir_seguro(ruta_slot(slot), _construir_datos(NIVEL_INICIAL)):
 		return false
 
-	get_tree().change_scene_to_file(NIVEL_INICIAL)
-
-	return true
+	return _abrir_nivel(NIVEL_INICIAL)
 
 
 # Guarda en el slot actual. "lyn" es el personaje y "posicion" donde reaparece al cargar.
@@ -181,19 +184,10 @@ func cargar_partida(slot: int) -> bool:
 	_tiempo_acumulado = float(datos.get("tiempo_jugado", 0.0))
 	_inicio_sesion_ms = Time.get_ticks_msec()
 
-	var resultado := get_tree().change_scene_to_file(nivel)
+	_puede_reintentar = nivel != NIVEL_INICIAL
 
-	# Si el nivel guardado ya no existe, se empieza desde el nivel inicial
-	if resultado != OK:
-		print("[Carga] No se pudo abrir ", nivel, " (cod ", resultado, "), se usa el nivel inicial")
-		GameState.tiene_checkpoint = false
-		GameState.escena_checkpoint = ""
-		resultado = get_tree().change_scene_to_file(NIVEL_INICIAL)
-
-	if resultado != OK:
-		GameState.cargando_partida = false
-		ultimo_error = "no se pudo abrir el nivel"
-		return false
+	if not _abrir_nivel(nivel):
+		return _reintentar_con_nivel_inicial()
 
 	return true
 
@@ -254,6 +248,55 @@ func _construir_datos(nivel: String) -> Dictionary:
 		"tiempo_jugado": tiempo_total(),
 		"fecha": Time.get_datetime_string_from_system(false, true)
 	}
+
+
+# Si el nivel guardado no abre, se empieza desde el nivel inicial (sin checkpoint)
+func _reintentar_con_nivel_inicial() -> bool:
+	if _puede_reintentar:
+		_puede_reintentar = false
+		GameState.tiene_checkpoint = false
+		GameState.escena_checkpoint = ""
+		return _abrir_nivel(NIVEL_INICIAL)
+
+	GameState.cargando_partida = false
+	return false
+
+
+func _on_carga_fallida(motivo: String) -> void:
+	if _reintentar_con_nivel_inicial():
+		return
+
+	ultimo_error = motivo
+	error_de_carga.emit(motivo)
+
+
+# Abre un nivel mostrando la pantalla de carga (si esta instalada) y,
+# si no, cambia de escena directo. Dice exactamente por que falla.
+func _abrir_nivel(ruta: String) -> bool:
+	var pantalla = get_node_or_null("/root/PantallaCarga")
+
+	if pantalla != null:
+		if not pantalla.carga_fallida.is_connected(_on_carga_fallida):
+			pantalla.carga_fallida.connect(_on_carga_fallida)
+
+		pantalla.cargar_nivel(ruta)
+		return true
+
+	var escena := ResourceLoader.load(ruta) as PackedScene
+
+	if escena == null:
+		ultimo_error = "leer nivel"
+		print("[Nivel] ERROR: no se pudo leer ", ruta, " (mira los errores rojos de la consola)")
+		return false
+
+	var resultado := get_tree().change_scene_to_packed(escena)
+
+	if resultado != OK:
+		ultimo_error = "crear nivel (cod %d)" % resultado
+		print("[Nivel] ERROR: no se pudo crear ", ruta, " (cod ", resultado, ")")
+		return false
+
+	return true
 
 
 func _abs(ruta: String) -> String:

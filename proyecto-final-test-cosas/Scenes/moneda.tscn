@@ -1,15 +1,17 @@
 [gd_scene format=3 uid="uid://dbl7xea4crc6j"]
 
 [ext_resource type="Texture2D" uid="uid://bq67hb2anq1gq" path="res://Sprites ítems/Moneda.png" id="1_gvj4e"]
+[ext_resource type="AudioStream" uid="uid://bu62rvtb7ymxj" path="res://sounds/Moneda.mp3" id="2_j5x4i"]
 
 [sub_resource type="GDScript" id="GDScript_j5x4i"]
-script/source = "
-extends Area2D
+script/source = "extends Area2D
 
 const PUNTOS = 100
 
 var id_moneda = \"\"
 var recogida = false
+
+@onready var sonido_moneda: AudioStreamPlayer = $Moneda
 
 func _ready() -> void:
 	id_moneda = str(get_path())
@@ -36,6 +38,12 @@ func _on_body_entered(body: Node2D) -> void:
 	if id_moneda not in GameState.monedas_recogidas:
 		GameState.monedas_recogidas.append(id_moneda)
 
+	var sonido = sonido_moneda
+	remove_child(sonido)
+	get_tree().current_scene.add_child(sonido)
+	sonido.finished.connect(sonido.queue_free)
+	sonido.play()
+
 	queue_free()
 "
 
@@ -53,3 +61,6 @@ texture = ExtResource("1_gvj4e")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1727195156]
 scale = Vector2(3, 3)
 shape = SubResource("CircleShape2D_wder7")
+
+[node name="Moneda" type="AudioStreamPlayer" parent="." unique_id=665405090]
+stream = ExtResource("2_j5x4i")

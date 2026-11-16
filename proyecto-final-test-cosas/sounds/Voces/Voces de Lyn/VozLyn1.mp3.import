@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://l3foaufqaty6"
+path="res://.godot/imported/VozLyn1.mp3-d21e10a2e46fd0d5a2d8e2108578918a.mp3str"
+
+[deps]
+
+source_file="res://sounds/Voces/Voces de Lyn/VozLyn1.mp3"
+dest_files=["res://.godot/imported/VozLyn1.mp3-d21e10a2e46fd0d5a2d8e2108578918a.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

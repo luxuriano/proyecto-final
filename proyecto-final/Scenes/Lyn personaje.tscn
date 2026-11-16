@@ -639,7 +639,7 @@ size = Vector2(18, 40)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_udx3f"]
 size = Vector2(14, 25)
 
-[node name="Lyn Personaje" type="CharacterBody2D" unique_id=888920584]
+[node name="Lyn personaje" type="CharacterBody2D" unique_id=888920584]
 collision_layer = 2
 script = SubResource("GDScript_mdx60")
 

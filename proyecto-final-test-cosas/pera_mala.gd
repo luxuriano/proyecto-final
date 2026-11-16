@@ -3,8 +3,8 @@ extends CharacterBody2D
 const VELOCIDAD = 300.0
 const GRAVEDAD = 980.0
 
-const TIEMPO_PREPARACION_ATAQUE = 0.8
-const TIEMPO_COOLDOWN_ATAQUE = 1.0
+const TIEMPO_PREPARACION_ATAQUE = 0.6
+const TIEMPO_COOLDOWN_ATAQUE = 0.5
 const DANIO = 1
 
 const VIDA_MAXIMA = 5
@@ -41,6 +41,12 @@ var id_virus = ""
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
+# Sonidos
+@onready var sonido_caminar: AudioStreamPlayer = $Sonidos/VirusCamina
+@onready var sonido_dano: AudioStreamPlayer = $Sonidos/VirusDano
+@onready var sonido_golpear: AudioStreamPlayer = $Sonidos/VirusGolpear
+@onready var sonido_muerte: AudioStreamPlayer = $Sonidos/VirusMuerte
+
 
 func _ready() -> void:
 
@@ -65,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	if esta_muerto:
 
 		velocity = Vector2.ZERO
+		sonido_caminar.stop()
 
 		move_and_slide()
 
@@ -80,6 +87,7 @@ func _physics_process(delta: float) -> void:
 	if recibiendo_dano:
 
 		velocity = Vector2.ZERO
+		sonido_caminar.stop()
 
 		tiempo_dano -= delta
 
@@ -141,6 +149,24 @@ func _physics_process(delta: float) -> void:
 
 
 	move_and_slide()
+
+	actualizar_sonido_caminar()
+
+
+func actualizar_sonido_caminar() -> void:
+
+	if esta_muerto or recibiendo_dano or atacando or preparando_ataque:
+		sonido_caminar.stop()
+		return
+
+	if is_on_floor() and abs(velocity.x) > 0.1:
+
+		if not sonido_caminar.playing:
+			sonido_caminar.play()
+
+	else:
+
+		sonido_caminar.stop()
 
 
 func buscar_lyn() -> void:
@@ -284,6 +310,9 @@ func recibir_dano_de_lyn(reflejar: bool) -> void:
 	recibiendo_dano = true
 	tiempo_dano = TIEMPO_DANO
 
+	sonido_caminar.stop()
+	sonido_dano.play()
+
 
 	preparando_ataque = false
 	tiempo_preparacion = 0
@@ -328,6 +357,11 @@ func morir() -> void:
 
 	lyn_actual = null
 	punto_ataque_actual = null
+
+	sonido_caminar.stop()
+	sonido_dano.stop()
+	sonido_golpear.stop()
+	sonido_muerte.play()
 
 	$PuntoAtaqueIzq.monitoring = false
 	$PuntoAtaqueDer.monitoring = false
@@ -495,6 +529,9 @@ func atacar() -> void:
 
 			if lyn_actual.has_method("recibir_dano"):
 
+				# Sonido cuando el ataque impacta a Lyn
+				sonido_golpear.play()
+
 				if punto_ataque_actual == $PuntoAtaqueDer:
 
 					lyn_actual.recibir_dano(DANIO, true)
@@ -549,5 +586,5 @@ func actualizar_animacion() -> void:
 		sprite.flip_h = false
 
 
-func _on_area_2d_body_entered(body: Node2D) -> void:
+func _on_area_2d_body_entered(_body: Node2D) -> void:
 	pass

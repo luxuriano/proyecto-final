@@ -1,0 +1,490 @@
+[gd_scene format=3 uid="uid://q2ntrb7oaudh"]
+
+[ext_resource type="Texture2D" uid="uid://cbw5koq5emjvq" path="res://Sprites interfaz/Recuadro puntaje.png" id="1_3kbh4"]
+[ext_resource type="FontFile" uid="uid://by6ksq4m8mr5c" path="res://static/Oswald-Bold.ttf" id="2_lon6g"]
+[ext_resource type="AudioStream" uid="uid://ci4jxeylp846e" path="res://sounds/Voces/Voces del narrador/Narrador4.mp3" id="3_jvtg7"]
+[ext_resource type="AudioStream" uid="uid://cyp5ro1ry8jk0" path="res://sounds/Voces/Voces de Lyn/VozLyn5.mp3" id="3_minbf"]
+[ext_resource type="AudioStream" uid="uid://cimmrx2kehqig" path="res://sounds/Voces/Voces del narrador/Narradorfinal.mp3" id="5_l5b1x"]
+[ext_resource type="AudioStream" uid="uid://c3kfuojm0foab" path="res://sounds/Voces/Voces del narrador/Narrador6.mp3" id="5_lso28"]
+[ext_resource type="AudioStream" uid="uid://d00inmj7mn2b7" path="res://sounds/Voces/Voces de Lyn/VozLyn6.mp3" id="6_lso28"]
+[ext_resource type="Texture2D" uid="uid://cm0umlk32tgyu" path="res://Lyn Assets/LynEmoji4.png" id="8_jvtg7"]
+[ext_resource type="Texture2D" uid="uid://esnmgcbecgon" path="res://Lyn Assets/LynEmoji5.png" id="9_minbf"]
+[ext_resource type="Texture2D" uid="uid://pf4v7q0bkwh2" path="res://Lyn Assets/LynEmoji6.png" id="10_lso28"]
+[ext_resource type="Texture2D" uid="uid://cb0pas8l5oxdd" path="res://Lyn Assets/Proton1.png" id="11_lso28"]
+[ext_resource type="Texture2D" uid="uid://c2lvycb7sr1ax" path="res://Lyn Assets/Proton2.png" id="12_l5b1x"]
+[ext_resource type="Texture2D" uid="uid://bp2mc4qvqttbg" path="res://Sprites interfaz/Sprites botones/Boton rectangular.png" id="13_l5b1x"]
+[ext_resource type="AudioStream" uid="uid://doj6o1jypuupd" path="res://sounds/Boton.mp3" id="14_cm4gc"]
+
+[sub_resource type="GDScript" id="GDScript_3kbh4"]
+script/source = "extends Node2D
+
+var lyn_actual: CharacterBody2D = null
+
+var dialogo_activo = false
+var indice_dialogo = 0
+var dialogo_terminado = false
+
+@onready var area: Area2D = $Area2D
+@onready var fondo: Sprite2D = $CanvasLayer/Fondo
+
+# Cámara de la escena Nivel1
+@onready var camara_virus: Camera2D = get_tree().current_scene.get_node(\"CameraVirus\")
+
+# Sprites de Protonus
+@onready var proton1: Sprite2D = $CanvasLayer/Protonus/Proton1
+@onready var proton2: Sprite2D = $CanvasLayer/Protonus/Proton2
+
+# Textos del diálogo
+@onready var textos: Array[Label] = [
+	$CanvasLayer/Texto1,
+	$CanvasLayer/Texto2,
+	$CanvasLayer/Texto3,
+	$CanvasLayer/Texto4,
+	$CanvasLayer/Texto5
+]
+
+# Audios del diálogo
+@onready var audios: Array[AudioStreamPlayer] = [
+	$CanvasLayer/Audio1,
+	$CanvasLayer/Audio2,
+	$CanvasLayer/Audio3,
+	$CanvasLayer/Audio4,
+	$CanvasLayer/Audio5
+]
+
+# Sonido al avanzar el diálogo
+@onready var sonido_saltear: AudioStreamPlayer = $CanvasLayer/Saltear
+
+# Elementos para indicar que se puede avanzar
+@onready var avanza: Sprite2D = $CanvasLayer/Avanza/Sprite2D
+@onready var label_avanza: Label = $CanvasLayer/Avanza/Label
+@onready var label_avanza2: Label = $CanvasLayer/Avanza/Label2
+
+# Nombre que corresponde a cada texto
+@onready var nombres: Array[Label] = [
+	$CanvasLayer/Nombre1, # Texto1
+	$CanvasLayer/Nombre2, # Texto2
+	$CanvasLayer/Nombre2, # Texto3
+	$CanvasLayer/Nombre1, # Texto4
+	$CanvasLayer/Nombre2  # Texto5
+]
+
+# Sprites de reacciones de Lyn
+@onready var reacciones: Array[Sprite2D] = [
+	$CanvasLayer/ReaccionesLyn/Reaccion1,
+	$CanvasLayer/ReaccionesLyn/Reaccion2,
+	$CanvasLayer/ReaccionesLyn/Reaccion3
+]
+
+# 0 = Reaccion1
+# 1 = Reaccion2
+# 2 = Reaccion3
+# -1 = Ninguna
+var reacciones_por_texto: Array[int] = [
+	0,  # Texto1 -> Reaccion1
+	2,  # Texto2 -> Reaccion3
+	2,  # Texto3 -> Reaccion3
+	0,  # Texto4 -> Reaccion1
+	2   # Texto5 -> Reaccion3
+]
+
+# 0 = Proton1
+# 1 = Proton2
+# -1 = Ninguno
+var proton_por_texto: Array[int] = [
+	0,  # Texto1 -> Proton1
+	1,  # Texto2 -> Proton2
+	1,  # Texto3 -> Proton2
+	0,  # Texto4 -> Proton1
+	1   # Texto5 -> Proton2
+]
+
+
+func _ready() -> void:
+
+	fondo.hide()
+
+	# La cámara de Virus comienza desactivada.
+	camara_virus.enabled = false
+
+	# Ocultar todos los textos.
+	for texto in textos:
+		texto.hide()
+
+	# Ocultar los nombres.
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	# Ocultar las reacciones.
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	# Ocultar los sprites de Protonus.
+	proton1.hide()
+	proton2.hide()
+
+	# Ocultar los elementos para avanzar.
+	avanza.hide()
+	label_avanza.hide()
+	label_avanza2.hide()
+
+	area.body_entered.connect(_on_body_entered)
+
+
+func get_nombres_unicos() -> Array[Label]:
+	return [
+		$CanvasLayer/Nombre1,
+		$CanvasLayer/Nombre2
+	]
+
+
+func _on_body_entered(body: Node2D) -> void:
+
+	if dialogo_terminado or dialogo_activo:
+		return
+
+	if body.name != \"Lyn Personaje\":
+		return
+
+	iniciar_dialogo(body)
+
+
+func iniciar_dialogo(lyn: CharacterBody2D) -> void:
+
+	lyn_actual = lyn
+
+	dialogo_activo = true
+	indice_dialogo = 0
+
+	# Bloquear el movimiento de Lyn.
+	lyn_actual.bloqueada_por_dialogo = true
+
+	# Mantener activa la cámara de Lyn al comenzar.
+	lyn_actual.controlar_camara_dialogo(false)
+	camara_virus.enabled = false
+
+	detener_todos_los_audios()
+
+	fondo.show()
+
+	mostrar_dialogo()
+
+
+func mostrar_dialogo() -> void:
+
+	if indice_dialogo >= textos.size():
+		finalizar_dialogo()
+		return
+
+	# Ocultar todos los textos.
+	for texto in textos:
+		texto.hide()
+
+	# Ocultar todos los nombres.
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	# Ocultar todas las reacciones.
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	# Ocultar los sprites de Protonus.
+	proton1.hide()
+	proton2.hide()
+
+	detener_todos_los_audios()
+
+	# Mostrar el texto correspondiente.
+	textos[indice_dialogo].show()
+
+	# Mostrar el nombre correspondiente.
+	nombres[indice_dialogo].show()
+
+	# Mostrar la reacción de Lyn.
+	var indice_reaccion = reacciones_por_texto[indice_dialogo]
+
+	if indice_reaccion >= 0:
+		reacciones[indice_reaccion].show()
+
+	# Mostrar el Protonus correspondiente.
+	var indice_proton = proton_por_texto[indice_dialogo]
+
+	if indice_proton == 0:
+		proton1.show()
+	elif indice_proton == 1:
+		proton2.show()
+
+	# Mostrar el indicador para avanzar.
+	avanza.show()
+
+	if indice_dialogo == textos.size() - 1:
+		label_avanza.hide()
+		label_avanza2.show()
+	else:
+		label_avanza.show()
+		label_avanza2.hide()
+
+	# CONTROL DE LA CÁMARA.
+	if indice_dialogo == 1:
+
+		# Segundo texto: activar CameraVirus.
+		lyn_actual.controlar_camara_dialogo(true)
+		camara_virus.enabled = true
+
+	else:
+
+		# Los demás textos: volver a la cámara de Lyn.
+		camara_virus.enabled = false
+		lyn_actual.controlar_camara_dialogo(false)
+
+	# Reproducir el audio correspondiente.
+	if audios[indice_dialogo].stream != null:
+		audios[indice_dialogo].play()
+
+
+func detener_todos_los_audios() -> void:
+
+	for audio in audios:
+		audio.stop()
+
+
+func _input(event: InputEvent) -> void:
+
+	if not dialogo_activo:
+		return
+
+	if event.is_action_pressed(\"ui_e\") and not event.is_echo():
+
+		# Reproducir el sonido cada vez que se pulsa E.
+		if sonido_saltear.stream != null:
+			sonido_saltear.play()
+
+		avanzar_dialogo()
+
+		get_viewport().set_input_as_handled()
+
+
+func avanzar_dialogo() -> void:
+
+	indice_dialogo += 1
+
+	if indice_dialogo >= textos.size():
+		finalizar_dialogo()
+		return
+
+	mostrar_dialogo()
+
+
+func finalizar_dialogo() -> void:
+
+	dialogo_activo = false
+	dialogo_terminado = true
+
+	detener_todos_los_audios()
+
+	fondo.hide()
+
+	# Desactivar CameraVirus.
+	camara_virus.enabled = false
+
+	# Ocultar todos los textos.
+	for texto in textos:
+		texto.hide()
+
+	# Ocultar todos los nombres.
+	for nombre in get_nombres_unicos():
+		nombre.hide()
+
+	# Ocultar todas las reacciones.
+	for reaccion in reacciones:
+		reaccion.hide()
+
+	# Ocultar los sprites de Protonus.
+	proton1.hide()
+	proton2.hide()
+
+	# Ocultar el indicador para avanzar.
+	avanza.hide()
+	label_avanza.hide()
+	label_avanza2.hide()
+
+	if lyn_actual != null:
+
+		# Restaurar la cámara de Lyn.
+		lyn_actual.controlar_camara_dialogo(false)
+
+		# Desbloquear el movimiento de Lyn.
+		lyn_actual.bloqueada_por_dialogo = false
+
+	# Desactivar el área para que el diálogo no vuelva a comenzar.
+	area.set_deferred(\"monitoring\", false)
+	area.set_deferred(\"monitorable\", false)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7ouyu"]
+size = Vector2(115, 641)
+
+[node name="dialogos2" type="Node2D" unique_id=1897199403]
+script = SubResource("GDScript_3kbh4")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1302714184]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1184269359]
+position = Vector2(-47.5, -115.5)
+shape = SubResource("RectangleShape2D_7ouyu")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1419567845]
+
+[node name="Fondo" type="Sprite2D" parent="CanvasLayer" unique_id=967644463]
+position = Vector2(592.5, 535.625)
+scale = Vector2(0.4883333, 0.19674997)
+texture = ExtResource("1_3kbh4")
+
+[node name="Nombre1" type="Label" parent="CanvasLayer" unique_id=1645586314]
+offset_left = 866.0
+offset_top = 440.0
+offset_right = 1052.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(7.0655944e-05, 0.53247607, 0.9509247, 1)
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 47
+text = "Lyn"
+
+[node name="Nombre2" type="Label" parent="CanvasLayer" unique_id=1883514056]
+offset_left = 236.0
+offset_top = 440.0
+offset_right = 559.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0.99999946, 0.32330474, 0.35903174, 1)
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 47
+text = "Kernel Protenius"
+
+[node name="Texto1" type="Label" parent="CanvasLayer" unique_id=1085641073]
+offset_left = 331.0
+offset_top = 505.0
+offset_right = 869.0
+offset_bottom = 595.0
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 60
+text = "¿¡Q- que es esa cosa!?"
+
+[node name="Texto2" type="Label" parent="CanvasLayer" unique_id=748466348]
+offset_left = 219.0
+offset_top = 520.0
+offset_right = 1018.0
+offset_bottom = 722.0
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 22
+text = "Eso que ves ahí es un virus, un software malicioso que altera el funcionamiento de 
+un dispositivo sin permiso o consentimiento del usuario."
+
+[node name="Texto3" type="Label" parent="CanvasLayer" unique_id=1757844443]
+offset_left = 250.0
+offset_top = 517.0
+offset_right = 1045.0
+offset_bottom = 719.0
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 22
+text = "He instalado un antivirus en tu avatar. Ahora, eres capaz de destruirlo con 
+algunos golpes."
+
+[node name="Texto4" type="Label" parent="CanvasLayer" unique_id=232402713]
+offset_left = 347.0
+offset_top = 500.0
+offset_right = 845.0
+offset_bottom = 601.0
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 60
+text = "¿Y si me hace daño?"
+
+[node name="Texto5" type="Label" parent="CanvasLayer" unique_id=1652354668]
+offset_left = 244.0
+offset_top = 518.0
+offset_right = 1039.0
+offset_bottom = 720.0
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 22
+text = "No te preocupes, al eliminarlo, hay una probabilidad de que suelte una pera,
+ un chocolate o un pancho. Cualquiera de estas recuperará tu salud."
+
+[node name="Audio1" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1203287715]
+stream = ExtResource("3_minbf")
+volume_db = 5.0
+
+[node name="Audio2" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1737066734]
+stream = ExtResource("3_jvtg7")
+volume_db = 5.0
+
+[node name="Audio3" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=980238353]
+stream = ExtResource("5_l5b1x")
+volume_db = 5.0
+
+[node name="Audio4" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1895602931]
+stream = ExtResource("6_lso28")
+volume_db = 5.0
+
+[node name="Audio5" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=1832198772]
+stream = ExtResource("5_lso28")
+volume_db = 5.0
+
+[node name="ReaccionesLyn" type="Node" parent="CanvasLayer" unique_id=757794924]
+
+[node name="Reaccion1" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=917319344]
+position = Vector2(1036, 445)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("8_jvtg7")
+
+[node name="Reaccion2" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=1489793849]
+position = Vector2(1036, 445)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("9_minbf")
+
+[node name="Reaccion3" type="Sprite2D" parent="CanvasLayer/ReaccionesLyn" unique_id=1663674513]
+position = Vector2(1036, 445)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("10_lso28")
+
+[node name="Protonus" type="Node" parent="CanvasLayer" unique_id=584608262]
+
+[node name="Proton1" type="Sprite2D" parent="CanvasLayer/Protonus" unique_id=1878910548]
+position = Vector2(121, 477)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("11_lso28")
+
+[node name="Proton2" type="Sprite2D" parent="CanvasLayer/Protonus" unique_id=1112057877]
+position = Vector2(121, 477)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("12_l5b1x")
+
+[node name="Avanza" type="Node2D" parent="CanvasLayer" unique_id=365693690]
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Avanza" unique_id=2000336650]
+position = Vector2(835, 402)
+scale = Vector2(0.1, 0.058999997)
+texture = ExtResource("13_l5b1x")
+
+[node name="Label" type="Label" parent="CanvasLayer/Avanza" unique_id=1879923231]
+offset_left = 752.0
+offset_top = 383.0
+offset_right = 915.0
+offset_bottom = 438.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 22
+text = "\"E\" PARA SALTEAR"
+
+[node name="Label2" type="Label" parent="CanvasLayer/Avanza" unique_id=16702789]
+offset_left = 749.0
+offset_top = 384.0
+offset_right = 925.0
+offset_bottom = 439.0
+theme_override_colors/font_color = Color(0.61960787, 0.34509805, 1, 1)
+theme_override_fonts/font = ExtResource("2_lon6g")
+theme_override_font_sizes/font_size = 22
+text = "\"E\" PARA TERNINAR"
+
+[node name="Saltear" type="AudioStreamPlayer" parent="CanvasLayer" unique_id=2048017688]
+stream = ExtResource("14_cm4gc")

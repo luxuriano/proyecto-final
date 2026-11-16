@@ -1,12 +1,15 @@
 [gd_scene format=3 uid="uid://btqpt6jydtu3c"]
 
 [ext_resource type="Texture2D" uid="uid://cuowfium82sde" path="res://Sprites estatuas/Estatuarobot.png" id="1_luqgl"]
+[ext_resource type="AudioStream" uid="uid://dkktw2ayn06up" path="res://sounds/EstatuaBot.mp3" id="2_2cwi7"]
 
 [sub_resource type="GDScript" id="GDScript_r6hke"]
-script/source = "extends Area2D
-
+script/source = "
+extends Area2D
 
 var ya_usado = false
+
+@onready var sonido_guarda: AudioStreamPlayer = $Guarda
 
 
 func _ready() -> void:
@@ -44,6 +47,9 @@ func activar_checkpoint(lyn: Node2D) -> void:
 
 	ya_usado = true
 
+	# Reproducir sonido al activar el checkpoint
+	sonido_guarda.play()
+
 	set_deferred(\"monitoring\", false)
 	set_deferred(\"monitorable\", false)
 "
@@ -64,3 +70,6 @@ texture = ExtResource("1_luqgl")
 position = Vector2(0.5, -8)
 scale = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_tnhlw")
+
+[node name="Guarda" type="AudioStreamPlayer" parent="." unique_id=757685272]
+stream = ExtResource("2_2cwi7")

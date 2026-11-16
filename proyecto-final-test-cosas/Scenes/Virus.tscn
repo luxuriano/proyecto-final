@@ -14,11 +14,15 @@
 [ext_resource type="Texture2D" uid="uid://dhnvqab74jjwl" path="res://Sprites Virus/Virus quieto/Virus quieto 1.png" id="12_vytot"]
 [ext_resource type="Texture2D" uid="uid://nwskkja1lycc" path="res://Sprites Virus/Virus quieto/Virus quieto 2.png" id="13_up0qf"]
 [ext_resource type="Texture2D" uid="uid://blcsvjuylj534" path="res://Sprites Virus/Virus quieto/Virus quieto 3.png" id="14_274tx"]
+[ext_resource type="AudioStream" uid="uid://bj0ww4ije8br2" path="res://sounds/Virus sounds/Virus caminando.mp3" id="15_2h1a3"]
+[ext_resource type="AudioStream" uid="uid://bf13nv086iqsg" path="res://sounds/Virus sounds/Virus dano.mp3" id="16_cjiyd"]
+[ext_resource type="AudioStream" uid="uid://dbvjasfkhtkny" path="res://sounds/Virus sounds/Virus ataque.mp3" id="17_qnqkf"]
+[ext_resource type="AudioStream" uid="uid://wy8yic065dts" path="res://sounds/Virus sounds/Muerte Virus.mp3" id="18_77vgb"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_vs7n5"]
 animations = [{
 "frames": [{
-"duration": 3.0,
+"duration": 2.5,
 "texture": ExtResource("2_ddven")
 }, {
 "duration": 1.0,
@@ -57,10 +61,10 @@ animations = [{
 "duration": 8.0,
 "texture": ExtResource("8_77vgb")
 }, {
-"duration": 2.0,
+"duration": 1.5,
 "texture": ExtResource("9_s8m2q")
 }, {
-"duration": 2.0,
+"duration": 1.5,
 "texture": ExtResource("10_f8joh")
 }, {
 "duration": 1.0,
@@ -109,7 +113,7 @@ script = ExtResource("1_0lgdo")
 position = Vector2(-2.3841858e-07, 0)
 scale = Vector2(0.2, 0.2)
 sprite_frames = SubResource("SpriteFrames_vs7n5")
-animation = &"Virusquieto"
+animation = &"Virusmuerte"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888202289]
 position = Vector2(6.5000005, -3)
@@ -143,3 +147,21 @@ shape = SubResource("RectangleShape2D_bgqyf")
 visible = false
 position = Vector2(6, -3)
 shape = SubResource("RectangleShape2D_0lgdo")
+
+[node name="Sonidos" type="Node" parent="." unique_id=317839155]
+
+[node name="VirusCamina" type="AudioStreamPlayer" parent="Sonidos" unique_id=260539190]
+stream = ExtResource("15_2h1a3")
+volume_db = -8.477
+
+[node name="VirusGolpear" type="AudioStreamPlayer" parent="Sonidos" unique_id=493484052]
+stream = ExtResource("17_qnqkf")
+volume_db = -5.098
+
+[node name="VirusDano" type="AudioStreamPlayer" parent="Sonidos" unique_id=910669198]
+stream = ExtResource("16_cjiyd")
+volume_db = -6.118
+
+[node name="VirusMuerte" type="AudioStreamPlayer" parent="Sonidos" unique_id=1630916930]
+stream = ExtResource("18_77vgb")
+volume_db = -7.137
